@@ -1,0 +1,58 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: equipo2-postgres
+    environment:
+      POSTGRES_USER: tienda
+      POSTGRES_PASSWORD: tienda123
+      POSTGRES_DB: postgres
+    ports:
+      - "${POSTGRES_HOST_PORT:-5433}:5432"
+    volumes:
+      - equipo2_postgres_data:/var/lib/postgresql/data
+      - ./BD/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tienda -d pedidos_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  pagos:
+    build:
+      context: ./pagos
+    container_name: equipo2-pagos
+    environment:
+      PORT: 3004
+      DATABASE_URL: postgresql://tienda:tienda123@postgres:5432/pagos_db
+    ports:
+      - "3004:3004"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  pedidos:
+    build:
+      context: ./pedidos
+    container_name: equipo2-pedidos
+    environment:
+      PORT: 3003
+      DATABASE_URL: postgresql://tienda:tienda123@postgres:5432/pedidos_db
+      PAGOS_URL: http://pagos:3004
+      CLIENTES_URL: ${CLIENTES_URL:-}
+      PRODUCTOS_URL: ${PRODUCTOS_URL:-}
+      INVENTARIO_URL: ${INVENTARIO_URL:-}
+      NOTIFICACIONES_URL: ${NOTIFICACIONES_URL:-}
+      REQUEST_TIMEOUT_MS: ${REQUEST_TIMEOUT_MS:-5000}
+    ports:
+      - "3003:3003"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      pagos:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  equipo2_postgres_data:

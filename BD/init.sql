@@ -1,0 +1,2 @@
+CREATE DATABASE pedidos_db;
+CREATE DATABASE pagos_db;

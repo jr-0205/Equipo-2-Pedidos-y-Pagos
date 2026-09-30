@@ -1,0 +1,78 @@
+{
+  "info": {
+    "_postman_id": "c3ef65fe-76ad-4fde-8e36-equipo2pedidospagos",
+    "name": "Equipo 2 - Pedidos y Pagos",
+    "description": "Colección para probar los microservicios pedidos (3003) y pagos (3004).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "host",
+      "value": "localhost"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health pedidos",
+      "request": {
+        "method": "GET",
+        "url": "http://{{host}}:3003/health"
+      }
+    },
+    {
+      "name": "Crear pedido",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"clienteId\": 1,\n  \"productoId\": 1,\n  \"cantidad\": 2,\n  \"precioUnitario\": 75.50,\n  \"metodoPago\": \"tarjeta\"\n}"
+        },
+        "url": "http://{{host}}:3003/pedidos"
+      }
+    },
+    {
+      "name": "Listar pedidos",
+      "request": {
+        "method": "GET",
+        "url": "http://{{host}}:3003/pedidos"
+      }
+    },
+    {
+      "name": "Health pagos",
+      "request": {
+        "method": "GET",
+        "url": "http://{{host}}:3004/health"
+      }
+    },
+    {
+      "name": "Registrar pago manual",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"pedidoId\": 999,\n  \"monto\": 150.00,\n  \"metodo\": \"tarjeta\"\n}"
+        },
+        "url": "http://{{host}}:3004/pagos"
+      }
+    },
+    {
+      "name": "Listar pagos",
+      "request": {
+        "method": "GET",
+        "url": "http://{{host}}:3004/pagos"
+      }
+    }
+  ]
+}
