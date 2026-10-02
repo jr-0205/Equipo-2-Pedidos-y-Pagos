@@ -2,282 +2,169 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Equipo 2 · Pedidos y Pagos</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Tienda Universitaria · Microservicios</title>
   <style>
-    :root {
-      color-scheme: dark;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #0b1020;
-      color: #edf2ff;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background:
-        radial-gradient(circle at 10% 10%, rgba(70, 103, 255, .18), transparent 30rem),
-        radial-gradient(circle at 90% 20%, rgba(0, 214, 170, .12), transparent 26rem),
-        #0b1020;
-    }
-
-    main {
-      width: min(1100px, calc(100% - 32px));
-      margin: 0 auto;
-      padding: 48px 0 72px;
-    }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      gap: 24px;
-      align-items: end;
-      margin-bottom: 28px;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(2rem, 5vw, 4rem);
-      letter-spacing: -.05em;
-    }
-
-    .subtitle {
-      margin: 8px 0 0;
-      color: #9daccc;
-    }
-
-    .badge {
-      padding: 8px 12px;
-      border: 1px solid #293454;
-      border-radius: 999px;
-      color: #9daccc;
-      white-space: nowrap;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 18px;
-    }
-
-    .card {
-      background: rgba(16, 24, 45, .86);
-      border: 1px solid #243052;
-      border-radius: 22px;
-      padding: 22px;
-      box-shadow: 0 18px 60px rgba(0, 0, 0, .2);
-      backdrop-filter: blur(16px);
-    }
-
-    .card.full { grid-column: 1 / -1; }
-
-    h2 {
-      margin: 0 0 18px;
-      font-size: 1.05rem;
-    }
-
-    label {
-      display: grid;
-      gap: 7px;
-      color: #a8b4d2;
-      font-size: .9rem;
-    }
-
-    form {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    input, select, button {
-      width: 100%;
-      border-radius: 12px;
-      border: 1px solid #2a375d;
-      background: #0e1730;
-      color: #f7f9ff;
-      padding: 12px 13px;
-      font: inherit;
-    }
-
-    button {
-      border: 0;
-      background: linear-gradient(135deg, #5b77ff, #4ad6b8);
-      color: #07101e;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    button.secondary {
-      background: #16203a;
-      color: #dce5ff;
-      border: 1px solid #2b385f;
-    }
-
-    .actions {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    pre {
-      margin: 0;
-      min-height: 240px;
-      max-height: 460px;
-      overflow: auto;
-      padding: 16px;
-      border-radius: 14px;
-      background: #080d1a;
-      border: 1px solid #1f2946;
-      color: #c8d7ff;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .wide { grid-column: 1 / -1; }
-
-    @media (max-width: 760px) {
-      header { align-items: start; flex-direction: column; }
-      .grid, form { grid-template-columns: 1fr; }
-    }
+    :root{--bg:#07090d;--panel:#0f141d;--panel2:#121925;--line:#222c3c;--text:#f5f7fb;--muted:#8e9aaa;--accent:#8b5cf6;--accent2:#22d3ee;--good:#34d399;--bad:#fb7185;--warn:#fbbf24}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 15% -10%,rgba(139,92,246,.16),transparent 34rem),radial-gradient(circle at 95% 5%,rgba(34,211,238,.09),transparent 30rem),var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+    button,input,select,textarea{font:inherit}button{cursor:pointer}.app{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:100vh}
+    aside{position:sticky;top:0;height:100vh;padding:20px 14px;border-right:1px solid var(--line);background:rgba(8,11,16,.94);backdrop-filter:blur(18px)}
+    .brand{display:flex;gap:11px;align-items:center;padding:6px 8px 22px}.logo{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-weight:900;color:#07090d;background:linear-gradient(135deg,var(--accent),var(--accent2))}
+    .brand b{display:block;font-size:.95rem}.brand small{display:block;color:var(--muted);margin-top:2px}.nav{display:grid;gap:5px}.nav button{border:1px solid transparent;background:transparent;color:#aab4c2;padding:10px 12px;border-radius:11px;text-align:left}
+    .nav button:hover,.nav button.active{background:#151b26;color:#fff;border-color:#283449}.side-note{position:absolute;bottom:18px;left:14px;right:14px;border:1px solid var(--line);border-radius:13px;padding:12px;background:#0c1118;color:var(--muted);font-size:.75rem;line-height:1.45}
+    main{min-width:0}.topbar{height:72px;padding:0 26px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:20;border-bottom:1px solid var(--line);background:rgba(7,9,13,.84);backdrop-filter:blur(18px)}
+    .path{font-size:.86rem;color:var(--muted)}.path b{color:#fff}.content{max-width:1500px;margin:auto;padding:26px}.page{display:none}.page.active{display:block}.hero{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;margin-bottom:22px}
+    h1{font-size:clamp(1.9rem,3.4vw,3.2rem);letter-spacing:-.05em;margin:0}h2{font-size:1rem;margin:0}.lead{color:var(--muted);margin:7px 0 0;line-height:1.55;max-width:800px}
+    .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px}.card{border:1px solid var(--line);background:linear-gradient(180deg,rgba(17,23,34,.96),rgba(11,15,22,.96));border-radius:18px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.28)}
+    .s12{grid-column:span 12}.s8{grid-column:span 8}.s7{grid-column:span 7}.s6{grid-column:span 6}.s5{grid-column:span 5}.s4{grid-column:span 4}
+    .service{min-height:135px;display:flex;flex-direction:column;justify-content:space-between}.service-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.team{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;border:1px solid #2b364a;background:#171e2a;font-size:.78rem;font-weight:900}
+    .pill{font-size:.7rem;border:1px solid #2b364a;border-radius:999px;padding:5px 8px;color:var(--muted)}.pill.ok{color:var(--good);border-color:rgba(52,211,153,.35);background:rgba(52,211,153,.07)}.pill.bad{color:var(--bad);border-color:rgba(251,113,133,.32);background:rgba(251,113,133,.06)}.pill.test{color:var(--warn)}
+    .service-name{font-weight:800;margin-top:15px}.service-url{font-size:.73rem;color:var(--muted);word-break:break-all;margin-top:4px}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.kpi{border:1px solid var(--line);background:#0a0f16;border-radius:14px;padding:15px}.kpi small{color:var(--muted)}.kpi strong{display:block;font-size:1.65rem;margin-top:6px}
+    .flow{display:flex;gap:8px;align-items:center;overflow:auto;padding-top:12px}.flow span{white-space:nowrap}.step{border:1px solid var(--line);border-radius:999px;padding:8px 10px;font-size:.76rem;color:#aeb9c7}.step.ok{color:var(--good);border-color:rgba(52,211,153,.35)}.arrow{color:#59687b}
+    .toolbar{display:flex;flex-wrap:wrap;gap:9px;align-items:center}.btn{border:1px solid #2b374b;background:#161e2a;color:#edf2f7;border-radius:10px;padding:9px 12px;font-weight:750}.btn:hover{background:#1b2533}.btn.primary{border:0;color:#080b10;background:linear-gradient(135deg,var(--accent),#6d5dfc 50%,var(--accent2))}.btn.small{font-size:.77rem;padding:7px 9px}.btn.ghost{background:transparent}
+    .field{display:grid;gap:6px}.field label{font-size:.76rem;color:#a0acbc;font-weight:700}input,select,textarea{width:100%;border:1px solid #293549;background:#090e15;color:#f4f7fb;border-radius:10px;padding:10px 11px;outline:none}input:focus,select:focus,textarea:focus{border-color:#665bc7;box-shadow:0 0 0 3px rgba(139,92,246,.09)}
+    textarea{min-height:125px;resize:vertical;font:12px/1.5 "Cascadia Code",Consolas,monospace}.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.wide{grid-column:1/-1}.muted{color:var(--muted)}.note{border:1px solid #29364b;background:#0b1018;border-radius:12px;padding:11px 12px;color:#aeb9c7;font-size:.8rem;line-height:1.5}.code{font-family:"Cascadia Code",Consolas,monospace}
+    .table{overflow:auto;border:1px solid var(--line);border-radius:13px}.table table{width:100%;min-width:650px;border-collapse:collapse}.table th,.table td{padding:10px 11px;border-bottom:1px solid #1d2633;text-align:left;font-size:.79rem}.table th{background:#0c1118;color:#8f9baa}.table td{color:#dbe3ec}.empty{text-align:center;color:var(--muted);padding:26px}
+    pre{margin:0;min-height:180px;max-height:430px;overflow:auto;border:1px solid #1d2634;border-radius:13px;background:#070b10;padding:13px;color:#bcc7d5;font:12px/1.55 "Cascadia Code",Consolas,monospace;white-space:pre-wrap;word-break:break-word}
+    .config-row{display:grid;grid-template-columns:140px 1fr 84px;gap:9px;align-items:end;margin-bottom:10px}.toast{position:fixed;right:18px;bottom:18px;z-index:100;background:#151d29;border:1px solid #334158;padding:11px 13px;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.35);opacity:0;transform:translateY(8px);transition:.18s;pointer-events:none}.toast.show{opacity:1;transform:none}
+    @media(max-width:1100px){.s8,.s7,.s6,.s5,.s4{grid-column:span 12}.kpis{grid-template-columns:1fr 1fr}}@media(max-width:760px){.app{display:block}aside{position:fixed;left:0;right:0;top:auto;bottom:0;height:auto;z-index:50;border-right:0;border-top:1px solid var(--line);padding:7px}.brand,.side-note{display:none}.nav{grid-template-columns:repeat(4,1fr)}.nav button{padding:9px 5px;text-align:center;font-size:.7rem}.nav button:nth-child(n+5){display:none}.topbar{padding:0 14px}.content{padding:18px 12px 90px}.hero{align-items:flex-start;flex-direction:column}.form{grid-template-columns:1fr}.wide{grid-column:auto}.config-row{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
+<div class="app">
+  <aside>
+    <div class="brand"><div class="logo">TU</div><div><b>Tienda Universitaria</b><small>Arquitectura distribuida</small></div></div>
+    <nav class="nav">
+      <button class="active" data-page="dashboard">Resumen</button>
+      <button data-page="clientes">Clientes</button>
+      <button data-page="productos">Productos</button>
+      <button data-page="pedidos">Pedidos</button>
+      <button data-page="pagos">Pagos</button>
+      <button data-page="inventario">Inventario</button>
+      <button data-page="notificaciones">Notificaciones</button>
+      <button data-page="config">Conexiones</button>
+    </nav>
+    <div class="side-note"><b style="color:#fff">Equipo 2</b><br>Pedidos :3003 · Pagos :3004<br>PostgreSQL host :5433</div>
+  </aside>
+
   <main>
-    <header>
-      <div>
-        <h1>Pedidos + Pagos</h1>
-        <p class="subtitle">Equipo 2 · Tienda Universitaria Distribuida · PostgreSQL</p>
-      </div>
-      <span class="badge">3003 · 3004</span>
+    <header class="topbar">
+      <div class="path">Desarrollo de aplicaciones para internet avanzado III / <b id="title">Resumen</b></div>
+      <div class="toolbar"><button class="btn small ghost" id="probeAll">Probar servicios</button><button class="btn small" data-go="config">Conexiones</button></div>
     </header>
 
-    <section class="grid">
-      <article class="card">
-        <h2>Crear pedido</h2>
-        <form id="pedidoForm">
-          <label>
-            Cliente ID
-            <input name="clienteId" type="number" min="1" value="1" required>
-          </label>
-
-          <label>
-            Producto ID
-            <input name="productoId" type="number" min="1" value="1" required>
-          </label>
-
-          <label>
-            Cantidad
-            <input name="cantidad" type="number" min="1" value="1" required>
-          </label>
-
-          <label>
-            Precio unitario
-            <input name="precioUnitario" type="number" min="0" step="0.01" value="100">
-          </label>
-
-          <label class="wide">
-            Método de pago
-            <select name="metodoPago">
-              <option value="tarjeta">Tarjeta</option>
-              <option value="efectivo">Efectivo</option>
-              <option value="transferencia">Transferencia</option>
-            </select>
-          </label>
-
-          <button class="wide" type="submit">Crear pedido y registrar pago</button>
-        </form>
-      </article>
-
-      <article class="card">
-        <h2>Consultar datos</h2>
-        <div class="actions">
-          <button id="listarPedidos" class="secondary" type="button">Ver pedidos</button>
-          <button id="listarPagos" class="secondary" type="button">Ver pagos</button>
+    <div class="content">
+      <section id="dashboard" class="page active">
+        <div class="hero"><div><h1>Panel de integración</h1><p class="lead">Front único para consumir los seis microservicios de la Tienda Universitaria Distribuida.</p></div><button class="btn primary" id="refreshSummary">Actualizar resumen</button></div>
+        <div class="grid" id="serviceGrid"></div>
+        <div style="height:14px"></div>
+        <div class="grid">
+          <article class="card s12"><h2>Datos disponibles</h2><div style="height:13px"></div><div class="kpis"><div class="kpi"><small>Clientes</small><strong id="nClientes">—</strong></div><div class="kpi"><small>Productos</small><strong id="nProductos">—</strong></div><div class="kpi"><small>Pedidos</small><strong id="nPedidos">—</strong></div><div class="kpi"><small>Pagos</small><strong id="nPagos">—</strong></div></div></article>
+          <article class="card s12"><h2>Flujo distribuido</h2><div id="flow" class="flow"><span class="step">Cliente</span><span class="arrow">→</span><span class="step">Producto</span><span class="arrow">→</span><span class="step">Inventario</span><span class="arrow">→</span><span class="step">Pedido</span><span class="arrow">→</span><span class="step">Pago</span><span class="arrow">→</span><span class="step">Actualizar stock</span><span class="arrow">→</span><span class="step">Notificación</span></div></article>
         </div>
-        <div class="actions">
-          <button id="saludPedidos" class="secondary" type="button">Health pedidos</button>
-          <button id="saludPagos" class="secondary" type="button">Health pagos</button>
-        </div>
-        <p class="subtitle">
-          Si las URLs de otros equipos están vacías, el precio se toma del formulario.
-        </p>
-      </article>
+      </section>
 
-      <article class="card full">
-        <h2>Respuesta</h2>
-        <pre id="output">Listo para probar.</pre>
-      </article>
-    </section>
+      <section id="clientes" class="page">
+        <div class="hero"><div><h1>Clientes</h1><p class="lead">Consulta y alta del microservicio del Equipo 1.</p></div><button class="btn primary" id="loadClientes">Cargar clientes</button></div>
+        <div class="grid"><article class="card s8"><h2>Listado</h2><div style="height:12px"></div><div id="clientesTable" class="table"><div class="empty">Sin datos cargados.</div></div></article><article class="card s4"><h2>Crear cliente</h2><p class="muted" style="font-size:.78rem">JSON editable para adaptarse al esquema del Equipo 1.</p><textarea id="clienteJson">{
+  "nombre": "Ana López",
+  "correo": "ana@universidad.mx"
+}</textarea><div style="height:9px"></div><button class="btn primary" id="createCliente">POST /clientes</button></article></div>
+      </section>
+
+      <section id="productos" class="page">
+        <div class="hero"><div><h1>Productos</h1><p class="lead">Catálogo y consulta individual del Equipo 1.</p></div><button class="btn primary" id="loadProductos">Cargar productos</button></div>
+        <div class="grid"><article class="card s8"><h2>Catálogo</h2><div style="height:12px"></div><div id="productosTable" class="table"><div class="empty">Sin datos cargados.</div></div></article><article class="card s4"><h2>Buscar por ID</h2><div style="height:12px"></div><div class="field"><label>ID</label><input id="productoBuscarId" type="number" min="1" value="1"></div><div style="height:9px"></div><button class="btn" id="getProducto">GET /productos/:id</button><div style="height:11px"></div><pre id="productoOut">Sin consulta.</pre></article></div>
+      </section>
+
+      <section id="pedidos" class="page">
+        <div class="hero"><div><h1>Pedidos</h1><p class="lead">Crea pedidos con el flujo completo: cliente, producto, inventario, pago y notificación.</p></div><button class="btn" id="loadPedidos">Actualizar lista</button></div>
+        <div class="grid">
+          <article class="card s5"><h2>Nuevo pedido</h2><div style="height:13px"></div><form id="pedidoForm" class="form">
+            <div class="field"><label>Cliente ID</label><input name="clienteId" type="number" min="1" value="1" required></div>
+            <div class="field"><label>Producto ID</label><input name="productoId" type="number" min="1" value="1" required></div>
+            <div class="field"><label>Cantidad</label><input name="cantidad" type="number" min="1" value="1" required></div>
+            <div class="field"><label>Precio unitario</label><input name="precioUnitario" type="number" min="0" step="0.01" placeholder="Opcional si productos está integrado"></div>
+            <div class="field wide"><label>Método de pago</label><select name="metodoPago"><option value="tarjeta">Tarjeta</option><option value="transferencia">Transferencia</option><option value="efectivo">Efectivo</option></select></div>
+            <button class="btn primary wide">Crear pedido</button>
+          </form><div style="height:11px"></div><div class="note"><b style="color:#fff">Backend:</b> el servicio pedidos usa las URLs configuradas en <span class="code">.env</span> para integrarse con los demás equipos.</div></article>
+          <article class="card s7"><h2>Pedidos registrados</h2><div style="height:12px"></div><div id="pedidosTable" class="table"><div class="empty">Sin datos cargados.</div></div></article>
+          <article class="card s12"><h2>Resultado de integración</h2><div style="height:12px"></div><pre id="pedidoOut">Esperando un pedido.</pre></article>
+        </div>
+      </section>
+
+      <section id="pagos" class="page">
+        <div class="hero"><div><h1>Pagos</h1><p class="lead">Consulta y registro del microservicio del Equipo 2.</p></div><button class="btn primary" id="loadPagos">Cargar pagos</button></div>
+        <div class="grid"><article class="card s8"><h2>Pagos registrados</h2><div style="height:12px"></div><div id="pagosTable" class="table"><div class="empty">Sin datos cargados.</div></div></article><article class="card s4"><h2>Pago manual</h2><div style="height:12px"></div><div class="form"><div class="field"><label>Pedido ID</label><input id="pagoPedidoId" type="number" min="1" value="1"></div><div class="field"><label>Monto</label><input id="pagoMonto" type="number" min=".01" step=".01" value="100"></div><div class="field wide"><label>Método</label><select id="pagoMetodo"><option>tarjeta</option><option>transferencia</option><option>efectivo</option></select></div><button class="btn wide" id="createPago">POST /pagos</button></div></article></div>
+      </section>
+
+      <section id="inventario" class="page">
+        <div class="hero"><div><h1>Inventario</h1><p class="lead">Consulta y actualización de existencias del Equipo 3.</p></div></div>
+        <div class="grid"><article class="card s6"><h2>Consultar existencia</h2><div style="height:12px"></div><div class="field"><label>Producto ID</label><input id="invId" type="number" min="1" value="1"></div><div style="height:9px"></div><button class="btn primary" id="getInventario">GET /inventario/:productoId</button><div style="height:11px"></div><pre id="inventarioOut">Sin consulta.</pre></article><article class="card s6"><h2>Actualizar existencia</h2><div style="height:12px"></div><div class="field"><label>Producto ID</label><input id="invUpdateId" type="number" min="1" value="1"></div><div style="height:9px"></div><div class="field"><label>Nueva existencia</label><input id="invStock" type="number" min="0" value="10"></div><div style="height:9px"></div><button class="btn" id="updateInventario">PUT /inventario/:productoId</button></article></div>
+      </section>
+
+      <section id="notificaciones" class="page">
+        <div class="hero"><div><h1>Notificaciones</h1><p class="lead">Envía mensajes al microservicio del Equipo 3.</p></div></div>
+        <div class="grid"><article class="card s6"><h2>Nueva notificación</h2><p class="muted" style="font-size:.78rem">JSON editable para compatibilidad.</p><textarea id="notifJson">{
+  "tipo": "PRUEBA_FRONT",
+  "pedidoId": 1,
+  "mensaje": "Prueba desde el front integrado"
+}</textarea><div style="height:9px"></div><button class="btn primary" id="sendNotif">POST /notificaciones</button></article><article class="card s6"><h2>Respuesta</h2><div style="height:12px"></div><pre id="notifOut">Sin envíos.</pre></article></div>
+      </section>
+
+      <section id="config" class="page">
+        <div class="hero"><div><h1>Conexiones</h1><p class="lead">Define las IP reales y puertos de cada computadora. Esta configuración se guarda en el navegador.</p></div><button class="btn primary" id="saveConfig">Guardar</button></div>
+        <div class="grid"><article class="card s8"><h2>URLs base</h2><div style="height:13px"></div><div id="configFields"></div></article><article class="card s4"><h2>Reglas de red</h2><div style="height:12px"></div><div class="note">Entre computadoras usa <b style="color:#fff">IP del host + puerto publicado</b>.<br><br>Ejemplo: <span class="code">http://192.168.1.101:3001</span>.<br><br>Si aparece <span class="code">Failed to fetch</span>, revisa CORS y Firewall de Windows.</div><div style="height:9px"></div><button class="btn" id="resetConfig">Restablecer</button></article><article class="card s12"><h2>Consola HTTP</h2><div style="height:12px"></div><pre id="console">Lista para registrar peticiones.</pre></article></div>
+      </section>
+    </div>
   </main>
+</div>
+<div id="toast" class="toast"></div>
 
-  <script>
-    const output = document.getElementById('output');
-    const host = window.location.hostname || 'localhost';
-    const pedidosBase = window.location.origin;
-    const pagosBase = window.location.protocol + '//' + host + ':3004';
+<script>
+(()=>{
+  const host=location.hostname||'localhost';
+  const defaults={clientes:`http://${host}:3001`,productos:`http://${host}:3002`,pedidos:location.port==='3003'?location.origin:`http://${host}:3003`,pagos:`http://${host}:3004`,inventario:`http://${host}:3005`,notificaciones:`http://${host}:3006`};
+  const services=[['clientes','Clientes','E1',3001],['productos','Productos','E1',3002],['pedidos','Pedidos','E2',3003],['pagos','Pagos','E2',3004],['inventario','Inventario','E3',3005],['notificaciones','Notificaciones','E3',3006]];
+  let config={...defaults,...parse(localStorage.getItem('tu-microservices-config'))};
+  const names={dashboard:'Resumen',clientes:'Clientes',productos:'Productos',pedidos:'Pedidos',pagos:'Pagos',inventario:'Inventario',notificaciones:'Notificaciones',config:'Conexiones'};
+  function parse(v){try{return JSON.parse(v||'{}')}catch{return{}}} function norm(v){return String(v||'').trim().replace(/\/+$/,'')}
+  function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+  function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast.x);toast.x=setTimeout(()=>t.classList.remove('show'),2400)}
+  function log(label,data){const c=document.getElementById('console');if(!c)return;const block=`[${new Date().toLocaleTimeString()}] ${label}\n${typeof data==='string'?data:JSON.stringify(data,null,2)}\n\n`;c.textContent=(block+c.textContent).slice(0,16000)}
+  function rows(data){if(Array.isArray(data))return data;for(const k of ['data','clientes','productos','pedidos','pagos','items','resultados'])if(Array.isArray(data?.[k]))return data[k];return[]}
+  function table(id,data){const e=document.getElementById(id),r=rows(data);if(!r.length){e.innerHTML='<div class="empty">No hay registros.</div>';return}const keys=[...new Set(r.flatMap(x=>Object.keys(x||{})))].slice(0,10);e.innerHTML=`<table><thead><tr>${keys.map(k=>`<th>${esc(k)}</th>`).join('')}</tr></thead><tbody>${r.map(x=>`<tr>${keys.map(k=>`<td>${esc(typeof x?.[k]==='object'?JSON.stringify(x[k]):x?.[k])}</td>`).join('')}</tr>`).join('')}</tbody></table>`}
+  async function api(key,path='',opt={}){const url=norm(config[key])+path;if(!norm(config[key]))throw Error(`URL no configurada para ${key}`);const opts={...opt,headers:{...(opt.body?{'Content-Type':'application/json'}:{}),...(opt.headers||{})}};log(`${opts.method||'GET'} ${url}`,opt.body?parse(opt.body):'');let res;try{res=await fetch(url,opts)}catch(e){log(`ERROR ${url}`,e.message);throw Error(`No se pudo conectar con ${url}. ${e.message}`)}const raw=await res.text();let data=raw;try{data=raw?JSON.parse(raw):null}catch{}log(`${res.status} ${url}`,data);if(!res.ok){const er=Error(data?.error||data?.detalle||`HTTP ${res.status}`);er.data=data;throw er}return data}
+  function go(id){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));document.getElementById(id).classList.add('active');document.getElementById('title').textContent=names[id]||id;scrollTo({top:0,behavior:'smooth'})}
+  document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>go(b.dataset.page));document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
 
-    async function showRequest(url, options) {
-      output.textContent = 'Consultando...';
+  function renderServices(){document.getElementById('serviceGrid').innerHTML=services.map(([k,n,t,p])=>`<article class="card service s4"><div><div class="service-head"><div class="team">${t}</div><span id="status-${k}" class="pill">Sin probar</span></div><div class="service-name">${n}</div><div class="service-url">${esc(config[k])}</div></div><div class="muted" style="font-size:.71rem">Puerto esperado · ${p}</div></article>`).join('')}
+  async function probe(k){const pill=document.getElementById('status-'+k);pill.className='pill test';pill.textContent='Probando…';const paths={clientes:'/clientes',productos:'/productos',pedidos:'/health',pagos:'/health',inventario:'/inventario/1',notificaciones:'/health'};try{const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),2800),r=await fetch(norm(config[k])+paths[k],{signal:ctl.signal});clearTimeout(tm);pill.className='pill ok';pill.textContent=r.ok?'En línea':`Responde ${r.status}`;return true}catch{pill.className='pill bad';pill.textContent='Sin conexión';return false}}
+  async function probeAll(){await Promise.all(services.map(x=>probe(x[0])))}document.getElementById('probeAll').onclick=probeAll;
 
-      try {
-        const response = await fetch(url, options);
-        const text = await response.text();
-        let data = text;
+  async function summary(){for(const [k,p,id] of [['clientes','/clientes','nClientes'],['productos','/productos','nProductos'],['pedidos','/pedidos','nPedidos'],['pagos','/pagos','nPagos']]){const e=document.getElementById(id);e.textContent='…';api(k,p).then(d=>e.textContent=rows(d).length).catch(()=>e.textContent='—')}}document.getElementById('refreshSummary').onclick=summary;
 
-        try {
-          data = JSON.parse(text);
-        } catch {}
+  document.getElementById('loadClientes').onclick=async()=>{try{table('clientesTable',await api('clientes','/clientes'))}catch(e){toast(e.message)}};
+  document.getElementById('createCliente').onclick=async()=>{try{await api('clientes','/clientes',{method:'POST',body:JSON.stringify(parse(document.getElementById('clienteJson').value))});toast('Cliente enviado');table('clientesTable',await api('clientes','/clientes'))}catch(e){toast(e.message)}};
+  document.getElementById('loadProductos').onclick=async()=>{try{table('productosTable',await api('productos','/productos'))}catch(e){toast(e.message)}};
+  document.getElementById('getProducto').onclick=async()=>{const out=document.getElementById('productoOut');try{out.textContent=JSON.stringify(await api('productos','/productos/'+Number(document.getElementById('productoBuscarId').value)),null,2)}catch(e){out.textContent=e.message}};
 
-        output.textContent = JSON.stringify({
-          status: response.status,
-          ok: response.ok,
-          data
-        }, null, 2);
-      } catch (error) {
-        output.textContent = JSON.stringify({ error: error.message }, null, 2);
-      }
-    }
+  async function loadPedidos(){try{table('pedidosTable',await api('pedidos','/pedidos'))}catch(e){toast(e.message)}} document.getElementById('loadPedidos').onclick=loadPedidos;
+  document.getElementById('pedidoForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.currentTarget),body={clienteId:+f.get('clienteId'),productoId:+f.get('productoId'),cantidad:+f.get('cantidad'),metodoPago:f.get('metodoPago')};if(f.get('precioUnitario')!=='')body.precioUnitario=+f.get('precioUnitario');const out=document.getElementById('pedidoOut');out.textContent='Ejecutando flujo distribuido…';try{const d=await api('pedidos','/pedidos',{method:'POST',body:JSON.stringify(body)});out.textContent=JSON.stringify(d,null,2);const i=d?.integracion||{},flags=[i.clienteConsultado,i.productoConsultado,i.inventarioConsultado,true,i.pagoRegistrado,i.inventarioActualizado,i.notificacionEnviada];document.querySelectorAll('#flow .step').forEach((x,n)=>x.classList.toggle('ok',!!flags[n]));toast('Pedido creado');loadPedidos();summary()}catch(er){out.textContent=JSON.stringify(er.data||{error:er.message},null,2);toast(er.message)}};
 
-    document.getElementById('pedidoForm').addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const form = new FormData(event.currentTarget);
+  async function loadPagos(){try{table('pagosTable',await api('pagos','/pagos'))}catch(e){toast(e.message)}}document.getElementById('loadPagos').onclick=loadPagos;
+  document.getElementById('createPago').onclick=async()=>{try{await api('pagos','/pagos',{method:'POST',body:JSON.stringify({pedidoId:+document.getElementById('pagoPedidoId').value,monto:+document.getElementById('pagoMonto').value,metodo:document.getElementById('pagoMetodo').value})});toast('Pago registrado');loadPagos()}catch(e){toast(e.message)}};
 
-      const body = {
-        clienteId: Number(form.get('clienteId')),
-        productoId: Number(form.get('productoId')),
-        cantidad: Number(form.get('cantidad')),
-        metodoPago: form.get('metodoPago')
-      };
+  document.getElementById('getInventario').onclick=async()=>{const out=document.getElementById('inventarioOut');try{out.textContent=JSON.stringify(await api('inventario','/inventario/'+Number(document.getElementById('invId').value)),null,2)}catch(e){out.textContent=e.message}};
+  document.getElementById('updateInventario').onclick=async()=>{const id=+document.getElementById('invUpdateId').value,existencia=+document.getElementById('invStock').value;try{document.getElementById('inventarioOut').textContent=JSON.stringify(await api('inventario','/inventario/'+id,{method:'PUT',body:JSON.stringify({existencia,cantidad:existencia})}),null,2);toast('Inventario actualizado')}catch(e){toast(e.message)}};
+  document.getElementById('sendNotif').onclick=async()=>{const out=document.getElementById('notifOut');try{out.textContent=JSON.stringify(await api('notificaciones','/notificaciones',{method:'POST',body:JSON.stringify(parse(document.getElementById('notifJson').value))}),null,2);toast('Notificación enviada')}catch(e){out.textContent=e.message;toast(e.message)}};
 
-      const precio = form.get('precioUnitario');
-      if (precio !== '') {
-        body.precioUnitario = Number(precio);
-      }
+  function renderConfig(){document.getElementById('configFields').innerHTML=services.map(([k,n,t,p])=>`<div class="config-row"><div><b>${n}</b><div class="muted" style="font-size:.71rem">${t} · :${p}</div></div><div class="field"><label>URL base</label><input data-config="${k}" value="${esc(config[k])}"></div><button class="btn small" data-test="${k}">Probar</button></div>`).join('');document.querySelectorAll('[data-test]').forEach(b=>b.onclick=async()=>{save(false);go('dashboard');await probe(b.dataset.test);go('config')})}
+  function save(show=true){document.querySelectorAll('[data-config]').forEach(x=>config[x.dataset.config]=norm(x.value));localStorage.setItem('tu-microservices-config',JSON.stringify(config));renderServices();if(show)toast('Conexiones guardadas')}document.getElementById('saveConfig').onclick=()=>save(true);document.getElementById('resetConfig').onclick=()=>{config={...defaults};localStorage.removeItem('tu-microservices-config');renderConfig();renderServices();toast('Configuración restablecida')};
 
-      await showRequest(pedidosBase + '/pedidos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-    });
-
-    document.getElementById('listarPedidos').addEventListener('click', () => {
-      showRequest(pedidosBase + '/pedidos');
-    });
-
-    document.getElementById('listarPagos').addEventListener('click', () => {
-      showRequest(pagosBase + '/pagos');
-    });
-
-    document.getElementById('saludPedidos').addEventListener('click', () => {
-      showRequest(pedidosBase + '/health');
-    });
-
-    document.getElementById('saludPagos').addEventListener('click', () => {
-      showRequest(pagosBase + '/health');
-    });
-  </script>
+  renderServices();renderConfig();summary();probeAll();
+})();
+</script>
 </body>
 </html>
