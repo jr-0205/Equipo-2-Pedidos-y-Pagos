@@ -119,3 +119,20 @@ Si el navegador abre esas URLs pero `/gateway/status` dice que no hay conexión,
 2. que se haya reconstruido el contenedor después de cambiar el archivo;
 3. que Docker pueda alcanzar la IP LAN;
 4. que Firewall de Windows permita los puertos publicados.
+
+
+## Demostración del flujo
+
+El menú **Flujo** permite demostrar en una sola pantalla el recorrido real de una compra:
+
+1. **Clientes** — `GET /clientes/:id`: valida al cliente.
+2. **Productos** — `GET /productos/:id`: obtiene producto y precio.
+3. **Inventario** — `GET /inventario/:productoId`: comprueba existencia.
+4. **Pedidos** — `POST /pedidos`: registra el pedido y orquesta el proceso.
+5. **Pagos** — `POST /pagos`: registra el pago.
+6. **Inventario** — `PUT /inventario/:productoId`: descuenta existencias.
+7. **Notificaciones** — `POST /notificaciones`: registra el mensaje final.
+
+Los pasos se marcan visualmente como **completados**, **omitidos** o **fallidos** usando los datos reales devueltos por el microservicio Pedidos.
+
+Para la demostración final, los tres equipos deben estar conectados y las cuatro URLs externas del `.env` del Equipo 2 deben estar configuradas.
