@@ -6,76 +6,116 @@ La vista web está en:
 pedidos/public/index.html
 ```
 
-Se sirve desde el microservicio **pedidos**, por lo que después de levantar Docker se abre en:
+Se sirve desde **Pedidos**:
 
 ```text
 http://localhost:3003
 ```
 
-## Qué consume
+## Cambio importante: gateway del Equipo 2
 
-| Equipo | Servicio | Puerto | Rutas usadas por el front |
-|---|---|---:|---|
-| 1 | clientes | 3001 | `GET /clientes`, `POST /clientes` |
-| 1 | productos | 3002 | `GET /productos`, `GET /productos/:id` |
-| 2 | pedidos | 3003 | `GET /health`, `GET /pedidos`, `POST /pedidos` |
-| 2 | pagos | 3004 | `GET /health`, `GET /pagos`, `POST /pagos` |
-| 3 | inventario | 3005 | `GET /inventario/:productoId`, `PUT /inventario/:productoId` |
-| 3 | notificaciones | 3006 | `POST /notificaciones` |
+El navegador ya no consulta directamente a los puertos de los otros equipos.
 
-## Configuración del navegador
-
-En la sección **Conexiones** del front coloca la IP real de cada computadora. Ejemplo:
+Ahora el flujo es:
 
 ```text
-clientes       http://192.168.1.101:3001
-productos      http://192.168.1.101:3002
-pedidos        http://192.168.1.102:3003
-pagos          http://192.168.1.102:3004
-inventario     http://192.168.1.103:3005
-notificaciones http://192.168.1.103:3006
+Navegador
+   |
+   v
+Pedidos :3003
+   |
+   +-- /gateway/clientes      -> Equipo 1 :3001
+   +-- /gateway/productos     -> Equipo 1 :3002
+   +-- /gateway/pagos         -> Equipo 2 :3004
+   +-- /gateway/inventario    -> Equipo 3 :3005
+   +-- /gateway/notificaciones-> Equipo 3 :3006
 ```
 
-Estas URLs se guardan en `localStorage` del navegador.
+Esto evita que el front dependa de la configuración CORS de las computadoras de los otros equipos.
 
-## Configuración del backend de pedidos
+## Configuración correcta del .env
 
-Para que `POST /pedidos` ejecute el flujo distribuido completo, también configura el archivo `.env` del Equipo 2:
+Usa solamente la URL base del servicio.
+
+Ejemplo para una computadora del Equipo 1 en `192.168.6.63`:
 
 ```env
-CLIENTES_URL=http://192.168.1.101:3001
-PRODUCTOS_URL=http://192.168.1.101:3002
-INVENTARIO_URL=http://192.168.1.103:3005
-NOTIFICACIONES_URL=http://192.168.1.103:3006
+CLIENTES_URL=http://192.168.6.63:3001
+PRODUCTOS_URL=http://192.168.6.63:3002
 ```
 
-Después reconstruye:
+No uses:
+
+```env
+CLIENTES_URL=http://192.168.6.63:3001/clientes
+PRODUCTOS_URL=http://192.168.6.63:3002/productos
+```
+
+El backend agrega automáticamente las rutas `/clientes` y `/productos`.
+
+También se normalizan URLs que accidentalmente terminen con el nombre del servicio, pero es mejor mantener el archivo limpio.
+
+## Endpoints del gateway
+
+| Método | Ruta del Equipo 2 | Destino |
+|---|---|---|
+| GET | `/gateway/status` | comprueba las integraciones |
+| GET | `/gateway/clientes` | `GET /clientes` |
+| GET | `/gateway/clientes/:id` | `GET /clientes/:id` |
+| POST | `/gateway/clientes` | `POST /clientes` |
+| GET | `/gateway/productos` | `GET /productos` |
+| GET | `/gateway/productos/:id` | `GET /productos/:id` |
+| GET | `/gateway/pagos` | `GET /pagos` |
+| POST | `/gateway/pagos` | `POST /pagos` |
+| GET | `/gateway/inventario/:productoId` | consulta existencia |
+| PUT | `/gateway/inventario/:productoId` | actualiza existencia |
+| POST | `/gateway/notificaciones` | registra notificación |
+
+## Front
+
+El panel incluye:
+
+- detección de estado de los seis servicios;
+- conteo de clientes, productos, pedidos y pagos;
+- consulta y alta de clientes;
+- catálogo de productos;
+- creación y listado de pedidos;
+- consulta y registro de pagos;
+- consulta y actualización de inventario;
+- envío de notificaciones;
+- consola HTTP;
+- visualización del flujo de integración.
+
+## Aplicar cambios
+
+Después de editar `.env`:
 
 ```bash
+docker compose down
 docker compose up --build -d
+docker compose ps
 ```
 
-## Flujo esperado
+Luego abre:
 
-1. pedidos valida al cliente;
-2. consulta el producto;
-3. consulta inventario;
-4. registra el pedido;
-5. solicita el pago;
-6. actualiza inventario;
-7. solicita una notificación.
+```text
+http://localhost:3003
+```
 
-## Problemas frecuentes
+## Diagnóstico
 
-### Failed to fetch
+Para el Equipo 1, estas URLs deben abrir desde Windows:
 
-Verifica:
+```text
+http://192.168.6.63:3001/clientes
+http://192.168.6.63:3002/productos
+```
 
-- que las computadoras estén en la misma red;
-- que los puertos 3001 a 3006 estén publicados y permitidos por Firewall;
-- que los microservicios externos permitan CORS;
-- que se use la IP de la computadora anfitriona, no el nombre del contenedor del otro equipo.
+Pero en el `.env` deben guardarse sin `/clientes` ni `/productos`.
 
-### Equipo 2 funciona, pero los demás no
+Si el navegador abre esas URLs pero `/gateway/status` dice que no hay conexión, revisa:
 
-El front puede probar pedidos y pagos localmente aunque los otros equipos estén apagados. Para crear pedidos sin productos externo, captura también `precioUnitario`.
+1. que el contenedor de Pedidos tenga las variables del `.env`;
+2. que se haya reconstruido el contenedor después de cambiar el archivo;
+3. que Docker pueda alcanzar la IP LAN;
+4. que Firewall de Windows permita los puertos publicados.
