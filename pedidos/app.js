@@ -7,18 +7,77 @@ const app = express();
 const PORT = Number(process.env.PORT || 3003);
 const REQUEST_TIMEOUT_MS = Number(process.env.REQUEST_TIMEOUT_MS || 5000);
 
-const PAGOS_URL = normalizeBaseUrl(process.env.PAGOS_URL || 'http://pagos:3004');
-const CLIENTES_URL = normalizeBaseUrl(process.env.CLIENTES_URL || '');
-const PRODUCTOS_URL = normalizeBaseUrl(process.env.PRODUCTOS_URL || '');
-const INVENTARIO_URL = normalizeBaseUrl(process.env.INVENTARIO_URL || '');
-const NOTIFICACIONES_URL = normalizeBaseUrl(process.env.NOTIFICACIONES_URL || '');
+const PAGOS_URL = normalizeServiceBaseUrl(process.env.PAGOS_URL || 'http://pagos:3004', 'pagos');
+const CLIENTES_URL = normalizeServiceBaseUrl(process.env.CLIENTES_URL || '', 'clientes');
+const PRODUCTOS_URL = normalizeServiceBaseUrl(process.env.PRODUCTOS_URL || '', 'productos');
+const INVENTARIO_URL = normalizeServiceBaseUrl(process.env.INVENTARIO_URL || '', 'inventario');
+const NOTIFICACIONES_URL = normalizeServiceBaseUrl(process.env.NOTIFICACIONES_URL || '', 'notificaciones');
 
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-function normalizeBaseUrl(value) {
-  return String(value || '').trim().replace(/\/$/, '');
+function normalizeServiceBaseUrl(value, serviceName = '') {
+  let url = String(value || '').trim().replace(/\/+$/, '');
+
+  if (!url || !serviceName) {
+    return url;
+  }
+
+  const suffix = '/' + serviceName.toLowerCase();
+  if (url.toLowerCase().endsWith(suffix)) {
+    url = url.slice(0, -suffix.length).replace(/\/+$/, '');
+  }
+
+  return url;
+}
+
+async function probeHttp(url) {
+  if (!url) {
+    return { configured: false, reachable: false, status: null };
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    return {
+      configured: true,
+      reachable: true,
+      status: response.status
+    };
+  } catch (error) {
+    return {
+      configured: true,
+      reachable: false,
+      status: null,
+      error: error.name === 'AbortError' ? 'timeout' : error.message
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function gatewayRequest(res, baseUrl, serviceName, pathSuffix, options = {}) {
+  if (!baseUrl) {
+    return res.status(503).json({
+      error: 'Servicio no configurado',
+      servicio: serviceName,
+      detalle: 'Configura ' + serviceName.toUpperCase() + '_URL en el archivo .env del Equipo 2.'
+    });
+  }
+
+  try {
+    const data = await requestJson(baseUrl + pathSuffix, options);
+    return res.json(data);
+  } catch (error) {
+    return res.status(error.status || 502).json({
+      error: 'No fue posible consultar ' + serviceName,
+      detalle: error.message,
+      upstream: error.data || null
+    });
+  }
 }
 
 function numberOrNull(value) {
@@ -349,6 +408,110 @@ app.post('/pedidos', async (req, res) => {
     });
   }
 });
+
+
+/*
+ * Gateway del Equipo 2.
+ * El front se sirve desde :3003 y consume los otros equipos a través
+ * de estas rutas para evitar problemas de CORS en el navegador.
+ */
+app.get('/gateway/status', async (req, res) => {
+  const [clientes, productos, pagos, inventario, notificaciones] = await Promise.all([
+    probeHttp(CLIENTES_URL ? CLIENTES_URL + '/clientes' : ''),
+    probeHttp(PRODUCTOS_URL ? PRODUCTOS_URL + '/productos' : ''),
+    probeHttp(PAGOS_URL + '/health'),
+    probeHttp(INVENTARIO_URL ? INVENTARIO_URL + '/inventario/1' : ''),
+    probeHttp(NOTIFICACIONES_URL ? NOTIFICACIONES_URL + '/notificaciones' : '')
+  ]);
+
+  let pedidosOk = true;
+  try {
+    await pool.query('SELECT 1');
+  } catch {
+    pedidosOk = false;
+  }
+
+  res.json({
+    pedidos: {
+      configured: true,
+      reachable: pedidosOk,
+      status: pedidosOk ? 200 : 503,
+      url: 'http://' + req.hostname + ':' + PORT
+    },
+    pagos: { ...pagos, url: PAGOS_URL },
+    clientes: { ...clientes, url: CLIENTES_URL },
+    productos: { ...productos, url: PRODUCTOS_URL },
+    inventario: { ...inventario, url: INVENTARIO_URL },
+    notificaciones: { ...notificaciones, url: NOTIFICACIONES_URL }
+  });
+});
+
+app.get('/gateway/clientes', (req, res) =>
+  gatewayRequest(res, CLIENTES_URL, 'clientes', '/clientes')
+);
+
+app.get('/gateway/clientes/:id', (req, res) =>
+  gatewayRequest(res, CLIENTES_URL, 'clientes', '/clientes/' + encodeURIComponent(req.params.id))
+);
+
+app.post('/gateway/clientes', (req, res) =>
+  gatewayRequest(res, CLIENTES_URL, 'clientes', '/clientes', {
+    method: 'POST',
+    body: JSON.stringify(req.body)
+  })
+);
+
+app.get('/gateway/productos', (req, res) =>
+  gatewayRequest(res, PRODUCTOS_URL, 'productos', '/productos')
+);
+
+app.get('/gateway/productos/:id', (req, res) =>
+  gatewayRequest(res, PRODUCTOS_URL, 'productos', '/productos/' + encodeURIComponent(req.params.id))
+);
+
+app.get('/gateway/pagos', (req, res) =>
+  gatewayRequest(res, PAGOS_URL, 'pagos', '/pagos')
+);
+
+app.get('/gateway/pagos/:id', (req, res) =>
+  gatewayRequest(res, PAGOS_URL, 'pagos', '/pagos/' + encodeURIComponent(req.params.id))
+);
+
+app.post('/gateway/pagos', (req, res) =>
+  gatewayRequest(res, PAGOS_URL, 'pagos', '/pagos', {
+    method: 'POST',
+    body: JSON.stringify(req.body)
+  })
+);
+
+app.get('/gateway/inventario/:productoId', (req, res) =>
+  gatewayRequest(
+    res,
+    INVENTARIO_URL,
+    'inventario',
+    '/inventario/' + encodeURIComponent(req.params.productoId)
+  )
+);
+
+app.put('/gateway/inventario/:productoId', (req, res) =>
+  gatewayRequest(
+    res,
+    INVENTARIO_URL,
+    'inventario',
+    '/inventario/' + encodeURIComponent(req.params.productoId),
+    {
+      method: 'PUT',
+      body: JSON.stringify(req.body)
+    }
+  )
+);
+
+app.post('/gateway/notificaciones', (req, res) =>
+  gatewayRequest(res, NOTIFICACIONES_URL, 'notificaciones', '/notificaciones', {
+    method: 'POST',
+    body: JSON.stringify(req.body)
+  })
+);
 
 app.use((error, req, res, next) => {
   console.error(error);
