@@ -10,8 +10,33 @@ Implementación del **Equipo 2** para la práctica de Microservicios Distribuido
 - Una base lógica independiente para cada microservicio: `pedidos_db` y `pagos_db`.
 - Docker Compose para levantar todo el equipo.
 - Integración opcional con `clientes`, `productos`, `inventario` y `notificaciones`.
-- Vista web para probar el flujo desde el navegador.
+- **Front integrado** para consumir y probar los seis microservicios.
 - Colección de Postman.
+
+## Front integrado
+
+La aplicación web se sirve desde `pedidos/public/index.html`.
+
+Después de levantar Docker:
+
+```text
+http://localhost:3003
+```
+
+El panel incluye:
+
+- estado de los seis servicios;
+- clientes;
+- productos;
+- pedidos;
+- pagos;
+- inventario;
+- notificaciones;
+- configuración de IP y puerto por equipo;
+- consola HTTP;
+- visualización del flujo de integración de un pedido.
+
+La configuración detallada está en [FRONTEND.md](./FRONTEND.md).
 
 ## Estructura
 
@@ -33,6 +58,7 @@ Implementación del **Equipo 2** para la práctica de Microservicios Distribuido
 │   └── package.json
 ├── postman/
 │   └── Equipo-2-Pedidos-Pagos.postman_collection.json
+├── FRONTEND.md
 ├── .env.example
 ├── .gitignore
 └── docker-compose.yml
@@ -62,19 +88,19 @@ docker compose up --build -d
 docker compose ps
 ```
 
-5. Abre la vista de prueba:
+5. Abre:
 
 ```text
 http://localhost:3003
 ```
 
-Para apagar el proyecto:
+Para apagar:
 
 ```bash
 docker compose down
 ```
 
-Para borrar también los datos de PostgreSQL:
+Para borrar también los datos:
 
 ```bash
 docker compose down -v
@@ -84,7 +110,7 @@ docker compose down -v
 
 Mientras los otros equipos todavía no estén disponibles, deja vacías las URLs externas del archivo `.env`.
 
-Crea un pedido enviando el precio manualmente:
+Ejemplo:
 
 ```json
 {
@@ -102,11 +128,11 @@ Petición:
 POST http://localhost:3003/pedidos
 ```
 
-El servicio `pedidos` registra el pedido y envía automáticamente la información de pago al servicio `pagos`.
+El servicio `pedidos` registra el pedido y envía automáticamente la información a `pagos`.
 
 ## Integración con los otros equipos
 
-Edita `.env` con las IP reales de las computadoras de los otros equipos. Ejemplo basado en el esquema de la práctica:
+Configura `.env` con las IP reales:
 
 ```env
 CLIENTES_URL=http://192.168.1.101:3001
@@ -115,75 +141,51 @@ INVENTARIO_URL=http://192.168.1.103:3005
 NOTIFICACIONES_URL=http://192.168.1.103:3006
 ```
 
-Después reinicia:
+Después:
 
 ```bash
 docker compose up --build -d
 ```
 
-Cuando una URL está configurada, `pedidos` intenta integrarse con ese servicio:
+Flujo de pedidos:
 
-1. Consulta `clientes/:id`.
-2. Consulta `productos/:id`.
-3. Consulta `inventario/:productoId`.
-4. Registra el pedido.
-5. Envía el pago a `pagos`.
-6. Si el pago fue aprobado, intenta actualizar inventario.
-7. Si está configurado, envía una notificación.
+1. consulta `clientes/:id`;
+2. consulta `productos/:id`;
+3. consulta `inventario/:productoId`;
+4. registra el pedido;
+5. envía el pago a `pagos`;
+6. actualiza inventario;
+7. envía una notificación.
 
-Para tolerar pequeñas diferencias entre los equipos, el precio del producto puede venir como `precio`, `precio_unitario` o `price`; la existencia puede venir como `existencia`, `stock` o `cantidad`.
+El precio puede venir como `precio`, `precio_unitario` o `price`; la existencia como `existencia`, `stock` o `cantidad`.
 
 ## API de pedidos
 
 | Método | Ruta | Función |
 |---|---|---|
-| GET | `/health` | Estado del microservicio y PostgreSQL |
+| GET | `/health` | Estado del servicio y PostgreSQL |
 | GET | `/pedidos` | Lista pedidos |
 | GET | `/pedidos/:id` | Consulta un pedido |
 | POST | `/pedidos` | Crea un pedido y solicita su pago |
-
-### POST /pedidos
-
-Campos:
-
-- `clienteId`: obligatorio.
-- `productoId`: obligatorio.
-- `cantidad`: entero mayor que 0.
-- `precioUnitario`: obligatorio sólo cuando no se usa el servicio de productos.
-- `metodoPago`: opcional; por defecto `tarjeta`.
 
 ## API de pagos
 
 | Método | Ruta | Función |
 |---|---|---|
-| GET | `/health` | Estado del microservicio y PostgreSQL |
+| GET | `/health` | Estado del servicio y PostgreSQL |
 | GET | `/pagos` | Lista pagos |
 | GET | `/pagos/:id` | Consulta un pago |
 | GET | `/pagos/pedido/:pedidoId` | Busca el pago de un pedido |
-| POST | `/pagos` | Registra un pago proveniente de pedidos |
-
-### POST /pagos
-
-Ejemplo:
-
-```json
-{
-  "pedidoId": 1,
-  "monto": 151.00,
-  "metodo": "tarjeta"
-}
-```
-
-El endpoint es idempotente por `pedidoId`: si recibe dos veces el mismo pedido, devuelve el pago ya registrado en vez de duplicarlo.
+| POST | `/pagos` | Registra un pago |
 
 ## PostgreSQL
 
-Docker crea automáticamente:
+Docker crea:
 
-- `pedidos_db`: tabla `pedidos`.
+- `pedidos_db`: tabla `pedidos`;
 - `pagos_db`: tabla `pagos`.
 
-Credenciales de laboratorio por defecto:
+Credenciales de laboratorio:
 
 ```text
 usuario: tienda
@@ -191,8 +193,6 @@ contraseña: tienda123
 host desde Windows: localhost
 puerto desde Windows: 5433
 ```
-
-Estas credenciales son únicamente para el entorno de práctica. Para otro entorno deben cambiarse.
 
 ## Postman
 
@@ -202,11 +202,9 @@ Importa:
 postman/Equipo-2-Pedidos-Pagos.postman_collection.json
 ```
 
-La colección incluye salud, alta y consulta de pedidos, y alta y consulta de pagos.
-
 ## Comunicación en red local
 
-- Entre contenedores del Equipo 2 se utiliza la red interna de Docker.
-- Para otros equipos se utiliza la IP local de la computadora anfitriona y el puerto publicado.
+- Dentro del Equipo 2 se usa la red interna de Docker.
+- Entre computadoras se usa la IP local del host y el puerto publicado.
 - No uses como hostname el nombre del contenedor de otro equipo.
-- Verifica que Windows Firewall permita los puertos 3003 y 3004.
+- Verifica Firewall de Windows y CORS para las peticiones desde el navegador.
