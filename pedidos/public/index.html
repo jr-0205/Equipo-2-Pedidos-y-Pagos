@@ -27,8 +27,20 @@
     textarea{min-height:125px;resize:vertical;font:12px/1.5 "Cascadia Code",Consolas,monospace}.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.wide{grid-column:1/-1}.muted{color:var(--muted)}.note{border:1px solid #29364b;background:#0b1018;border-radius:12px;padding:11px 12px;color:#aeb9c7;font-size:.8rem;line-height:1.5}.code{font-family:"Cascadia Code",Consolas,monospace}
     .table{overflow:auto;border:1px solid var(--line);border-radius:13px}.table table{width:100%;min-width:650px;border-collapse:collapse}.table th,.table td{padding:10px 11px;border-bottom:1px solid #1d2633;text-align:left;font-size:.79rem}.table th{background:#0c1118;color:#8f9baa}.table td{color:#dbe3ec}.empty{text-align:center;color:var(--muted);padding:26px}
     pre{margin:0;min-height:180px;max-height:430px;overflow:auto;border:1px solid #1d2634;border-radius:13px;background:#070b10;padding:13px;color:#bcc7d5;font:12px/1.55 "Cascadia Code",Consolas,monospace;white-space:pre-wrap;word-break:break-word}
-    .config-row{display:grid;grid-template-columns:140px 1fr 84px;gap:9px;align-items:end;margin-bottom:10px}.toast{position:fixed;right:18px;bottom:18px;z-index:100;background:#151d29;border:1px solid #334158;padding:11px 13px;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.35);opacity:0;transform:translateY(8px);transition:.18s;pointer-events:none}.toast.show{opacity:1;transform:none}
-    @media(max-width:1100px){.s8,.s7,.s6,.s5,.s4{grid-column:span 12}.kpis{grid-template-columns:1fr 1fr}}@media(max-width:760px){.app{display:block}aside{position:fixed;left:0;right:0;top:auto;bottom:0;height:auto;z-index:50;border-right:0;border-top:1px solid var(--line);padding:7px}.brand,.side-note{display:none}.nav{grid-template-columns:repeat(4,1fr)}.nav button{padding:9px 5px;text-align:center;font-size:.7rem}.nav button:nth-child(n+5){display:none}.topbar{padding:0 14px}.content{padding:18px 12px 90px}.hero{align-items:flex-start;flex-direction:column}.form{grid-template-columns:1fr}.wide{grid-column:auto}.config-row{grid-template-columns:1fr}}
+    .config-row{display:grid;grid-template-columns:140px 1fr 84px;gap:9px;align-items:end;margin-bottom:10px}
+    .workflow-board{display:grid;grid-template-columns:repeat(7,minmax(150px,1fr));gap:10px;overflow-x:auto;padding:4px 0 10px}
+    .wf-node{position:relative;min-height:168px;border:1px solid var(--line);border-radius:15px;padding:14px;background:#0a0f16;transition:.2s}
+    .wf-node::after{content:"→";position:absolute;right:-10px;top:50%;transform:translate(50%,-50%);color:#526174;font-weight:900;z-index:2}
+    .wf-node:last-child::after{display:none}
+    .wf-node.ok{border-color:rgba(52,211,153,.48);box-shadow:inset 0 0 0 1px rgba(52,211,153,.08)}
+    .wf-node.fail{border-color:rgba(251,113,133,.48);box-shadow:inset 0 0 0 1px rgba(251,113,133,.06)}
+    .wf-node.skip{border-color:rgba(251,191,36,.38)}
+    .wf-number{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:#161e2b;border:1px solid #2d394d;font-size:.75rem;font-weight:900}
+    .wf-node.ok .wf-number{color:var(--good);border-color:rgba(52,211,153,.4)}.wf-node.fail .wf-number{color:var(--bad)}.wf-node.skip .wf-number{color:var(--warn)}
+    .wf-service{font-weight:850;margin-top:13px}.wf-action{font-size:.75rem;color:var(--muted);line-height:1.4;margin-top:4px}.wf-endpoint{font:10px/1.45 "Cascadia Code",Consolas,monospace;color:#8aa0bd;margin-top:9px;word-break:break-all}
+    .wf-state{display:inline-block;margin-top:10px;padding:4px 7px;border-radius:999px;border:1px solid #2a3548;color:var(--muted);font-size:.68rem}.wf-node.ok .wf-state{color:var(--good);border-color:rgba(52,211,153,.35)}.wf-node.fail .wf-state{color:var(--bad);border-color:rgba(251,113,133,.35)}.wf-node.skip .wf-state{color:var(--warn);border-color:rgba(251,191,36,.3)}
+    .toast{position:fixed;right:18px;bottom:18px;z-index:100;background:#151d29;border:1px solid #334158;padding:11px 13px;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.35);opacity:0;transform:translateY(8px);transition:.18s;pointer-events:none}.toast.show{opacity:1;transform:none}
+    @media(max-width:1100px){.s8,.s7,.s6,.s5,.s4{grid-column:span 12}.kpis{grid-template-columns:1fr 1fr}}@media(max-width:760px){.app{display:block}aside{position:fixed;left:0;right:0;top:auto;bottom:0;height:auto;z-index:50;border-right:0;border-top:1px solid var(--line);padding:7px}.brand,.side-note{display:none}.nav{grid-template-columns:repeat(5,1fr)}.nav button{padding:9px 5px;text-align:center;font-size:.68rem}.nav button:nth-child(n+6){display:none}.topbar{padding:0 14px}.content{padding:18px 12px 90px}.hero{align-items:flex-start;flex-direction:column}.form{grid-template-columns:1fr}.wide{grid-column:auto}.config-row{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -40,6 +52,7 @@
       <button data-page="clientes">Clientes</button>
       <button data-page="productos">Productos</button>
       <button data-page="pedidos">Pedidos</button>
+      <button data-page="flujo">Flujo</button>
       <button data-page="pagos">Pagos</button>
       <button data-page="inventario">Inventario</button>
       <button data-page="notificaciones">Notificaciones</button>
@@ -94,6 +107,99 @@
         </div>
       </section>
 
+
+      <section id="flujo" class="page">
+        <div class="hero">
+          <div>
+            <h1>Flujo de trabajo</h1>
+            <p class="lead">Demostración real del recorrido de una compra entre los microservicios. Cada estado se obtiene de la respuesta de Pedidos.</p>
+          </div>
+          <button class="btn" id="checkWorkflow">Comprobar servicios</button>
+        </div>
+
+        <div class="grid">
+          <article class="card s12">
+            <div class="toolbar" style="justify-content:space-between;margin-bottom:14px">
+              <div>
+                <h2>Arquitectura de la solicitud</h2>
+                <div class="muted" style="font-size:.77rem;margin-top:4px">El servicio Pedidos actúa como orquestador del flujo.</div>
+              </div>
+              <span class="pill" id="workflowGeneral">Listo para iniciar</span>
+            </div>
+
+            <div class="workflow-board" id="workflowBoard">
+              <div class="wf-node" data-wf="cliente">
+                <div class="wf-number">1</div><div class="wf-service">Clientes</div>
+                <div class="wf-action">Validar que el cliente exista.</div>
+                <div class="wf-endpoint">GET /clientes/:id</div><span class="wf-state">Pendiente</span>
+              </div>
+              <div class="wf-node" data-wf="producto">
+                <div class="wf-number">2</div><div class="wf-service">Productos</div>
+                <div class="wf-action">Consultar producto y obtener precio.</div>
+                <div class="wf-endpoint">GET /productos/:id</div><span class="wf-state">Pendiente</span>
+              </div>
+              <div class="wf-node" data-wf="inventarioConsulta">
+                <div class="wf-number">3</div><div class="wf-service">Inventario</div>
+                <div class="wf-action">Verificar existencia disponible.</div>
+                <div class="wf-endpoint">GET /inventario/:productoId</div><span class="wf-state">Pendiente</span>
+              </div>
+              <div class="wf-node" data-wf="pedido">
+                <div class="wf-number">4</div><div class="wf-service">Pedidos</div>
+                <div class="wf-action">Registrar el pedido en PostgreSQL.</div>
+                <div class="wf-endpoint">POST /pedidos</div><span class="wf-state">Pendiente</span>
+              </div>
+              <div class="wf-node" data-wf="pago">
+                <div class="wf-number">5</div><div class="wf-service">Pagos</div>
+                <div class="wf-action">Registrar y aprobar el pago.</div>
+                <div class="wf-endpoint">POST /pagos</div><span class="wf-state">Pendiente</span>
+              </div>
+              <div class="wf-node" data-wf="inventarioActualiza">
+                <div class="wf-number">6</div><div class="wf-service">Inventario</div>
+                <div class="wf-action">Descontar la cantidad comprada.</div>
+                <div class="wf-endpoint">PUT /inventario/:productoId</div><span class="wf-state">Pendiente</span>
+              </div>
+              <div class="wf-node" data-wf="notificacion">
+                <div class="wf-number">7</div><div class="wf-service">Notificaciones</div>
+                <div class="wf-action">Registrar el mensaje de pedido pagado.</div>
+                <div class="wf-endpoint">POST /notificaciones</div><span class="wf-state">Pendiente</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="card s5">
+            <h2>Ejecutar demostración</h2>
+            <p class="muted" style="font-size:.78rem">Usa IDs existentes de los servicios de Clientes y Productos.</p>
+            <form id="workflowForm" class="form">
+              <div class="field"><label>Cliente ID</label><input name="clienteId" type="number" min="1" value="1" required></div>
+              <div class="field"><label>Producto ID</label><input name="productoId" type="number" min="1" value="1" required></div>
+              <div class="field"><label>Cantidad</label><input name="cantidad" type="number" min="1" value="1" required></div>
+              <div class="field"><label>Precio manual</label><input name="precioUnitario" type="number" min="0" step="0.01" placeholder="Solo si Productos no está integrado"></div>
+              <div class="field wide"><label>Método de pago</label><select name="metodoPago"><option value="tarjeta">Tarjeta</option><option value="transferencia">Transferencia</option><option value="efectivo">Efectivo</option></select></div>
+              <button class="btn primary wide" type="submit">Ejecutar flujo completo</button>
+            </form>
+            <div style="height:11px"></div>
+            <div class="note"><b style="color:#fff">Demostración:</b> si un servicio todavía no está configurado, se mostrará como “Omitido”. Cuando estén conectados los tres equipos, los siete pasos deben quedar completados.</div>
+          </article>
+
+          <article class="card s7">
+            <h2>Resultado de la ejecución</h2>
+            <div style="height:12px"></div>
+            <pre id="workflowOut">Aún no se ha ejecutado una demostración.</pre>
+          </article>
+
+          <article class="card s12">
+            <h2>Qué demuestra este flujo</h2>
+            <div style="height:12px"></div>
+            <div class="kpis">
+              <div class="kpi"><small>Equipo 1</small><strong style="font-size:1rem">Clientes + Productos</strong></div>
+              <div class="kpi"><small>Equipo 2</small><strong style="font-size:1rem">Pedidos + Pagos</strong></div>
+              <div class="kpi"><small>Equipo 3</small><strong style="font-size:1rem">Inventario + Notificaciones</strong></div>
+              <div class="kpi"><small>Comunicación</small><strong style="font-size:1rem">HTTP + JSON</strong></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
       <section id="pagos" class="page">
         <div class="hero"><div><h1>Pagos</h1><p class="lead">Consulta y registro del microservicio del Equipo 2.</p></div><button class="btn primary" id="loadPagos">Cargar pagos</button></div>
         <div class="grid"><article class="card s8"><h2>Pagos registrados</h2><div style="height:12px"></div><div id="pagosTable" class="table"><div class="empty">Sin datos cargados.</div></div></article><article class="card s4"><h2>Pago manual</h2><div style="height:12px"></div><div class="form"><div class="field"><label>Pedido ID</label><input id="pagoPedidoId" type="number" min="1" value="1"></div><div class="field"><label>Monto</label><input id="pagoMonto" type="number" min=".01" step=".01" value="100"></div><div class="field wide"><label>Método</label><select id="pagoMetodo"><option>tarjeta</option><option>transferencia</option><option>efectivo</option></select></div><button class="btn wide" id="createPago">POST /pagos</button></div></article></div>
@@ -128,7 +234,7 @@
   const serviceRoot={clientes:'/clientes',productos:'/productos',pedidos:'/pedidos',pagos:'/pagos',inventario:'/inventario',notificaciones:'/notificaciones'};
   const defaults={clientes:`http://${host}:3001`,productos:`http://${host}:3002`,pedidos:location.port==='3003'?location.origin:`http://${host}:3003`,pagos:`http://${host}:3004`,inventario:`http://${host}:3005`,notificaciones:`http://${host}:3006`};
   const services=[['clientes','Clientes','E1',3001],['productos','Productos','E1',3002],['pedidos','Pedidos','E2',3003],['pagos','Pagos','E2',3004],['inventario','Inventario','E3',3005],['notificaciones','Notificaciones','E3',3006]];
-  const names={dashboard:'Resumen',clientes:'Clientes',productos:'Productos',pedidos:'Pedidos',pagos:'Pagos',inventario:'Inventario',notificaciones:'Notificaciones',config:'Conexiones'};
+  const names={dashboard:'Resumen',clientes:'Clientes',productos:'Productos',pedidos:'Pedidos',flujo:'Flujo de trabajo',pagos:'Pagos',inventario:'Inventario',notificaciones:'Notificaciones',config:'Conexiones'};
 
   function parse(v){try{return JSON.parse(v||'{}')}catch{return{}}}
   function norm(v){return String(v||'').trim().replace(/\/+$/,'')}
@@ -219,6 +325,120 @@
   async function loadPedidos(){try{table('pedidosTable',await api('pedidos','/pedidos'))}catch(e){toast(e.message)}}
   document.getElementById('loadPedidos').onclick=loadPedidos;
   document.getElementById('pedidoForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.currentTarget),body={clienteId:+f.get('clienteId'),productoId:+f.get('productoId'),cantidad:+f.get('cantidad'),metodoPago:f.get('metodoPago')};if(f.get('precioUnitario')!=='')body.precioUnitario=+f.get('precioUnitario');const out=document.getElementById('pedidoOut');out.textContent='Ejecutando flujo distribuido…';try{const d=await api('pedidos','/pedidos',{method:'POST',body:JSON.stringify(body)});out.textContent=JSON.stringify(d,null,2);const i=d?.integracion||{},flags=[i.clienteConsultado,i.productoConsultado,i.inventarioConsultado,true,i.pagoRegistrado,i.inventarioActualizado,i.notificacionEnviada];document.querySelectorAll('#flow .step').forEach((x,n)=>x.classList.toggle('ok',!!flags[n]));toast('Pedido creado');loadPedidos();summary();probeAll()}catch(er){out.textContent=JSON.stringify(er.data||{error:er.message},null,2);toast(er.message)}};
+
+
+  function setWorkflowStep(key,state,label){
+    const node=document.querySelector('[data-wf="'+key+'"]');
+    if(!node)return;
+    node.classList.remove('ok','fail','skip');
+    if(state)node.classList.add(state);
+    const badge=node.querySelector('.wf-state');
+    if(badge)badge.textContent=label;
+  }
+
+  function resetWorkflow(){
+    ['cliente','producto','inventarioConsulta','pedido','pago','inventarioActualiza','notificacion'].forEach(k=>setWorkflowStep(k,'','Pendiente'));
+    const g=document.getElementById('workflowGeneral');
+    if(g){g.className='pill';g.textContent='Listo para iniciar'}
+  }
+
+  async function workflowStatus(){
+    try{
+      const r=await fetch('/gateway/status');
+      const s=await r.json();
+      const map=[
+        ['cliente',s.clientes],
+        ['producto',s.productos],
+        ['inventarioConsulta',s.inventario],
+        ['pedido',s.pedidos],
+        ['pago',s.pagos],
+        ['inventarioActualiza',s.inventario],
+        ['notificacion',s.notificaciones]
+      ];
+      for(const [step,info] of map){
+        if(!info?.configured)setWorkflowStep(step,'skip','No configurado');
+        else if(info.reachable)setWorkflowStep(step,'','Disponible');
+        else setWorkflowStep(step,'fail','Sin conexión');
+      }
+      toast('Estado de servicios actualizado');
+    }catch(e){toast('No fue posible comprobar el gateway')}
+  }
+  document.getElementById('checkWorkflow').onclick=workflowStatus;
+
+  document.getElementById('workflowForm').onsubmit=async e=>{
+    e.preventDefault();
+    resetWorkflow();
+    const form=new FormData(e.currentTarget);
+    const body={
+      clienteId:+form.get('clienteId'),
+      productoId:+form.get('productoId'),
+      cantidad:+form.get('cantidad'),
+      metodoPago:form.get('metodoPago')
+    };
+    if(form.get('precioUnitario')!=='')body.precioUnitario=+form.get('precioUnitario');
+
+    const out=document.getElementById('workflowOut');
+    const general=document.getElementById('workflowGeneral');
+    general.className='pill test';general.textContent='Ejecutando flujo…';
+    setWorkflowStep('pedido','','Orquestando…');
+    out.textContent='Enviando POST /pedidos. El microservicio Pedidos está coordinando el resto de servicios...';
+
+    let status={};
+    try{
+      const sr=await fetch('/gateway/status');
+      status=await sr.json();
+    }catch{}
+
+    try{
+      const data=await api('pedidos','/pedidos',{method:'POST',body:JSON.stringify(body)});
+      const i=data?.integracion||{};
+
+      setWorkflowStep('cliente',i.clienteConsultado?'ok':(status.clientes?.configured?'fail':'skip'),i.clienteConsultado?'Validado':(status.clientes?.configured?'No completado':'Omitido'));
+      setWorkflowStep('producto',i.productoConsultado?'ok':(status.productos?.configured?'fail':'skip'),i.productoConsultado?'Consultado':(status.productos?.configured?'No completado':'Omitido'));
+      setWorkflowStep('inventarioConsulta',i.inventarioConsultado?'ok':(status.inventario?.configured?'fail':'skip'),i.inventarioConsultado?'Existencia verificada':(status.inventario?.configured?'No completado':'Omitido'));
+      setWorkflowStep('pedido',data?.pedido?'ok':'fail',data?.pedido?'Pedido creado':'No creado');
+      setWorkflowStep('pago',i.pagoRegistrado?'ok':'fail',i.pagoRegistrado?'Pago aprobado':'No completado');
+      setWorkflowStep('inventarioActualiza',i.inventarioActualizado?'ok':(status.inventario?.configured?'fail':'skip'),i.inventarioActualizado?'Stock actualizado':(status.inventario?.configured?'No completado':'Omitido'));
+      setWorkflowStep('notificacion',i.notificacionEnviada?'ok':(status.notificaciones?.configured?'fail':'skip'),i.notificacionEnviada?'Mensaje registrado':(status.notificaciones?.configured?'No completado':'Omitido'));
+
+      const allConfigured=['clientes','productos','inventario','notificaciones'].every(k=>status[k]?.configured);
+      const allDone=i.clienteConsultado&&i.productoConsultado&&i.inventarioConsultado&&i.pagoRegistrado&&i.inventarioActualizado&&i.notificacionEnviada;
+      general.className='pill '+(allDone?'ok':(allConfigured?'bad':'test'));
+      general.textContent=allDone?'Flujo completo':(allConfigured?'Flujo incompleto':'Flujo parcial');
+
+      out.textContent=JSON.stringify({
+        demostracion:'Flujo de microservicios',
+        pedido:data.pedido,
+        pago:data.pago,
+        pasos:{
+          clientes:i.clienteConsultado,
+          productos:i.productoConsultado,
+          inventarioConsulta:i.inventarioConsultado,
+          pedido:Boolean(data.pedido),
+          pagos:i.pagoRegistrado,
+          inventarioActualizacion:i.inventarioActualizado,
+          notificaciones:i.notificacionEnviada
+        },
+        advertencia:data.advertenciaNotificacion||null
+      },null,2);
+
+      toast(allDone?'Flujo completo ejecutado':'Flujo ejecutado; revisa los pasos');
+      loadPedidos();summary();probeAll();
+    }catch(er){
+      const d=er.data||{};
+      const i=d.integracion||{};
+      setWorkflowStep('cliente',i.clienteConsultado?'ok':(status.clientes?.configured?'fail':'skip'),i.clienteConsultado?'Validado':(status.clientes?.configured?'Falló':'Omitido'));
+      setWorkflowStep('producto',i.productoConsultado?'ok':(status.productos?.configured?'fail':'skip'),i.productoConsultado?'Consultado':(status.productos?.configured?'Falló':'Omitido'));
+      setWorkflowStep('inventarioConsulta',i.inventarioConsultado?'ok':(status.inventario?.configured?'fail':'skip'),i.inventarioConsultado?'Verificado':(status.inventario?.configured?'Falló':'Omitido'));
+      setWorkflowStep('pedido',d.pedido?'ok':'fail',d.pedido?'Pedido creado':'Interrumpido');
+      setWorkflowStep('pago',i.pagoRegistrado?'ok':'fail',i.pagoRegistrado?'Pago aprobado':'No completado');
+      setWorkflowStep('inventarioActualiza',i.inventarioActualizado?'ok':(status.inventario?.configured?'fail':'skip'),i.inventarioActualizado?'Actualizado':(status.inventario?.configured?'No completado':'Omitido'));
+      setWorkflowStep('notificacion',i.notificacionEnviada?'ok':(status.notificaciones?.configured?'fail':'skip'),i.notificacionEnviada?'Registrada':(status.notificaciones?.configured?'No completado':'Omitido'));
+      general.className='pill bad';general.textContent='Flujo interrumpido';
+      out.textContent=JSON.stringify(d.error?d:{error:er.message},null,2);
+      toast('El flujo se interrumpió; revisa el paso marcado');
+    }
+  };
 
   async function loadPagos(){try{table('pagosTable',await api('pagos','/pagos'))}catch(e){toast(e.message)}}
   document.getElementById('loadPagos').onclick=loadPagos;
