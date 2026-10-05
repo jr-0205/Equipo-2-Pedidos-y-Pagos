@@ -591,77 +591,186 @@
       z-index:2000;
       display:grid;
       place-items:center;
-      padding:24px;
-      background:
-        radial-gradient(circle at 18% 10%, rgba(124,108,246,.12), transparent 32rem),
-        #08090a;
+      padding:22px;
+      background:#07080a;
     }
     .auth-gate.hidden{display:none}
-    .auth-panel{
-      width:min(920px,100%);
+    .auth-shell{
+      width:min(1120px,100%);
+      min-height:min(690px,calc(100vh - 44px));
       display:grid;
-      grid-template-columns:minmax(0,1fr) minmax(300px,.85fr);
-      gap:14px;
+      grid-template-columns:minmax(0,1.08fr) minmax(390px,.92fr);
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.09);
+      border-radius:20px;
+      background:#0b0d10;
+      box-shadow:0 40px 120px rgba(0,0,0,.45);
     }
-    .auth-main,.auth-info{
-      border:1px solid var(--line);
-      background:var(--surface);
-      border-radius:14px;
-      padding:24px;
+    .auth-showcase{
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      padding:34px;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 15% 15%,rgba(133,111,255,.28),transparent 34%),
+        radial-gradient(circle at 85% 80%,rgba(48,202,255,.14),transparent 30%),
+        linear-gradient(145deg,#11131a 0%,#0d1016 54%,#0a0b0e 100%);
+      border-right:1px solid rgba(255,255,255,.08);
+    }
+    .auth-showcase::after{
+      content:"";
+      position:absolute;
+      width:430px;
+      height:430px;
+      right:-210px;
+      top:80px;
+      border:1px solid rgba(255,255,255,.055);
+      border-radius:50%;
+      box-shadow:
+        0 0 0 70px rgba(255,255,255,.018),
+        0 0 0 140px rgba(255,255,255,.012);
+      pointer-events:none;
     }
     .auth-brand{
+      position:relative;
+      z-index:2;
       display:flex;
       align-items:center;
       gap:11px;
-      margin-bottom:26px;
     }
-    .auth-brand .logo{flex:0 0 auto}
-    .auth-eyebrow{
-      color:#70747d;
+    .auth-brand .logo{
+      width:38px;
+      height:38px;
+      background:#fff;
+      box-shadow:0 8px 30px rgba(0,0,0,.28);
+    }
+    .auth-brand-text strong{display:block;font-size:.88rem}
+    .auth-brand-text span{display:block;margin-top:3px;color:#767b87;font-size:.67rem}
+    .auth-copy-block{
+      position:relative;
+      z-index:2;
+      max-width:520px;
+      padding:34px 0 42px;
+    }
+    .auth-kicker{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      color:#ada5ff;
       font-size:.68rem;
       font-weight:800;
-      letter-spacing:.12em;
       text-transform:uppercase;
+      letter-spacing:.13em;
+    }
+    .auth-kicker::before{
+      content:"";
+      width:18px;
+      height:1px;
+      background:#8c7fff;
+    }
+    .auth-display{
+      margin:13px 0 0;
+      max-width:520px;
+      font-size:clamp(2.3rem,4.4vw,4.55rem);
+      line-height:.96;
+      letter-spacing:-.062em;
+      font-weight:820;
+    }
+    .auth-description{
+      max-width:460px;
+      margin:18px 0 0;
+      color:#9a9eaa;
+      font-size:.9rem;
+      line-height:1.65;
+    }
+    .auth-flow{
+      position:relative;
+      z-index:2;
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:8px;
+      max-width:520px;
+    }
+    .auth-flow-item{
+      min-height:96px;
+      padding:12px;
+      border:1px solid rgba(255,255,255,.075);
+      border-radius:12px;
+      background:rgba(9,11,15,.62);
+      backdrop-filter:blur(10px);
+    }
+    .auth-flow-item b{display:block;font-size:.74rem}
+    .auth-flow-item span{display:block;margin-top:6px;color:#737985;font-size:.66rem;line-height:1.45}
+    .auth-pane{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:40px;
+      background:#0b0d10;
+    }
+    .auth-form-wrap{width:min(100%,390px)}
+    .auth-eyebrow{
+      color:#6f747f;
+      font-size:.67rem;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.12em;
     }
     .auth-title{
-      margin:7px 0 0;
+      margin:8px 0 0;
       font-size:2rem;
+      line-height:1.08;
       letter-spacing:-.045em;
-      line-height:1.05;
     }
     .auth-copy{
       margin:9px 0 22px;
-      color:var(--muted);
-      font-size:.82rem;
-      line-height:1.6;
+      color:#8f949f;
+      font-size:.78rem;
+      line-height:1.55;
     }
+    .role-choice{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      margin-bottom:18px;
+    }
+    .role-option{
+      border:1px solid var(--line);
+      border-radius:11px;
+      padding:12px;
+      background:#0e1014;
+      color:#9da1aa;
+      text-align:left;
+      transition:border-color .16s ease,background .16s ease,color .16s ease;
+    }
+    .role-option:hover{border-color:rgba(255,255,255,.15);color:#fff}
+    .role-option.active{
+      color:#fff;
+      border-color:rgba(124,108,246,.58);
+      background:rgba(124,108,246,.09);
+      box-shadow:inset 0 0 0 1px rgba(124,108,246,.08);
+    }
+    .role-option strong{display:block;font-size:.79rem}
+    .role-option small{display:block;margin-top:4px;color:#707580;font-size:.64rem;line-height:1.4}
     .auth-form{display:grid;gap:11px}
-    .auth-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:3px}
+    .auth-form .btn.primary{margin-top:3px;padding:10px 12px}
+    .auth-demo{
+      margin-top:16px;
+      padding:11px 12px;
+      border:1px dashed rgba(255,255,255,.11);
+      border-radius:9px;
+      background:#090b0e;
+      color:#737984;
+      font-size:.67rem;
+      line-height:1.55;
+    }
+    .auth-demo b{color:#cfd2d8;font-family:"Cascadia Code",Consolas,monospace}
     .auth-error{
       min-height:18px;
-      margin-top:4px;
       color:var(--danger);
-      font-size:.72rem;
-    }
-    .credential-list{display:grid;gap:10px;margin-top:14px}
-    .credential-card{
-      border:1px solid var(--line);
-      border-radius:10px;
-      padding:14px;
-      background:#0b0d10;
-    }
-    .credential-card strong{display:block;font-size:.82rem}
-    .credential-card small{display:block;color:#737781;font-size:.68rem;margin-top:3px;line-height:1.45}
-    .credential-code{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-top:11px;
-      padding-top:10px;
-      border-top:1px solid var(--line);
-      color:#d9dadd;
-      font:11px/1.4 "Cascadia Code",Consolas,monospace;
+      font-size:.7rem;
     }
     .role-chip{
       display:inline-flex;
@@ -681,36 +790,186 @@
       border-radius:50%;
       background:var(--success);
     }
-    body.user-mode .app{
-      grid-template-columns:1fr;
+
+    .store-banner{
+      position:relative;
+      overflow:hidden;
+      display:grid;
+      grid-template-columns:minmax(0,1.2fr) minmax(260px,.8fr);
+      gap:24px;
+      align-items:end;
+      margin-bottom:16px;
+      padding:26px;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:16px;
+      background:
+        radial-gradient(circle at 86% 20%,rgba(124,108,246,.20),transparent 32%),
+        linear-gradient(145deg,#141720,#0d0f13 70%);
     }
-    body.user-mode .app>aside{
-      display:none;
+    .store-banner::after{
+      content:"";
+      position:absolute;
+      right:-36px;
+      top:-58px;
+      width:230px;
+      height:230px;
+      border:1px solid rgba(255,255,255,.05);
+      border-radius:50%;
+      box-shadow:0 0 0 42px rgba(255,255,255,.012),0 0 0 84px rgba(255,255,255,.008);
     }
-    body.user-mode .topbar{
-      padding-left:max(18px,calc((100vw - var(--content))/2 + 30px));
-      padding-right:max(18px,calc((100vw - var(--content))/2 + 30px));
+    .store-banner-copy{position:relative;z-index:2}
+    .store-banner-label{
+      color:#9c94ff;
+      font-size:.66rem;
+      font-weight:800;
+      letter-spacing:.12em;
+      text-transform:uppercase;
     }
-    body.user-mode .topbar .path{
-      color:#d9dadd;
-      font-weight:700;
+    .store-banner h2{
+      max-width:620px;
+      margin:8px 0 0;
+      font-size:clamp(1.55rem,3vw,2.55rem);
+      line-height:1.06;
+      letter-spacing:-.045em;
     }
-    body.user-mode .topbar .path b{
-      display:none;
+    .store-banner p{
+      max-width:560px;
+      margin:10px 0 0;
+      color:#9297a2;
+      font-size:.78rem;
+      line-height:1.55;
     }
-    body.user-mode #probeAll,
-    body.user-mode [data-go="config"]{
-      display:none;
+    .store-benefits{
+      position:relative;
+      z-index:2;
+      display:grid;
+      gap:7px;
     }
-    body.user-mode #uxReload{
-      display:none;
+    .store-benefit{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:10px 11px;
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:9px;
+      background:rgba(9,11,14,.62);
+      color:#b8bbc2;
+      font-size:.7rem;
     }
-    body.user-mode #experiencia .hero{
-      margin-bottom:18px;
+    .store-benefit span:last-child{color:#666c77}
+    .store-tools{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin-bottom:12px;
+    }
+    .store-search{
+      flex:1;
+      position:relative;
+    }
+    .store-search input{padding-left:34px}
+    .store-search::before{
+      content:"⌕";
+      position:absolute;
+      left:12px;
+      top:50%;
+      transform:translateY(-50%);
+      color:#656a75;
+      font-size:1rem;
+      z-index:2;
+    }
+    .profile-card{
+      display:grid;
+      grid-template-columns:minmax(0,1fr);
+    }
+    .product-card{
+      overflow:hidden;
+      padding:0;
+      min-height:255px;
+      background:#0d0f12;
+    }
+    .product-visual{
+      height:112px;
+      display:grid;
+      place-items:center;
+      background:
+        linear-gradient(145deg,rgba(124,108,246,.13),rgba(47,197,255,.055)),
+        #11141a;
+      border-bottom:1px solid var(--line);
+    }
+    .product-visual span{
+      width:48px;
+      height:48px;
+      display:grid;
+      place-items:center;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:14px;
+      background:rgba(255,255,255,.045);
+      color:#d8d5ff;
+      font-size:.88rem;
+      font-weight:850;
+      letter-spacing:.03em;
+    }
+    .product-body{
+      display:flex;
+      flex:1;
+      flex-direction:column;
+      gap:11px;
+      padding:14px;
     }
 
+    body.user-mode{
+      background:#090b0e;
+    }
+    body.user-mode .app{grid-template-columns:1fr}
+    body.user-mode .app>aside{display:none}
+    body.user-mode .topbar{
+      height:68px;
+      padding-left:max(18px,calc((100vw - var(--content))/2 + 30px));
+      padding-right:max(18px,calc((100vw - var(--content))/2 + 30px));
+      background:rgba(9,11,14,.94);
+    }
+    body.user-mode .topbar .path{
+      color:#f1f2f4;
+      font-size:.88rem;
+      font-weight:800;
+    }
+    body.user-mode .topbar .path b{display:none}
+    body.user-mode #probeAll,
+    body.user-mode [data-go="config"]{display:none}
+    body.user-mode #uxReload{display:none}
+    body.user-mode #experiencia .hero{display:none}
+    body.user-mode #experiencia .profile-card{
+      padding:13px 15px;
+      background:#0c0e12;
+    }
+    body.user-mode #experiencia .profile-card h2{
+      font-size:.78rem;
+      color:#cfd2d8;
+    }
+    body.user-mode #experiencia .profile-card p{
+      margin:4px 0 10px!important;
+      font-size:.68rem!important;
+    }
+    body.user-mode #experiencia .ux-progress{margin-top:14px}
+    body.user-mode .content{padding-top:22px}
+
     @media(max-width:900px){
-      .auth-panel{grid-template-columns:1fr}
+      .auth-gate{padding:0}
+      .auth-shell{
+        min-height:100vh;
+        grid-template-columns:1fr;
+        border:0;
+        border-radius:0;
+      }
+      .auth-showcase{display:none}
+      .auth-pane{padding:28px 20px}
+      .store-banner{grid-template-columns:1fr}
+      .store-benefits{grid-template-columns:repeat(3,minmax(0,1fr))}
+      .store-benefit{display:block}
+      .store-benefit span{display:block}
+      .store-benefit span:last-child{margin-top:3px}
     }
 
     @media(max-width:1120px){
@@ -767,49 +1026,62 @@
 <body>
 
 <div class="auth-gate" id="authGate">
-  <div class="auth-panel">
-    <section class="auth-main">
+  <div class="auth-shell">
+    <section class="auth-showcase">
       <div class="auth-brand">
         <div class="logo">TU</div>
-        <div>
-          <div class="auth-eyebrow">Acceso de demostración</div>
+        <div class="auth-brand-text">
           <strong>Tienda Universitaria</strong>
+          <span>Arquitectura distribuida · Equipo 2</span>
         </div>
       </div>
 
-      <h1 class="auth-title">Elige cómo quieres probar el sistema.</h1>
-      <p class="auth-copy">El acceso solo cambia la experiencia del front. No modifica URLs, puertos, variables de entorno ni la comunicación actual entre microservicios.</p>
+      <div class="auth-copy-block">
+        <div class="auth-kicker">Demostración interactiva</div>
+        <h1 class="auth-display">Un sistema.<br>Dos perspectivas.</h1>
+        <p class="auth-description">Prueba la compra como cliente o entra al panel operativo para observar cómo los microservicios coordinan pedidos, pagos, inventario y notificaciones.</p>
+      </div>
 
-      <form id="loginForm" class="auth-form">
-        <div class="field">
-          <label>Usuario</label>
-          <input id="loginUser" autocomplete="username" placeholder="admin o usuario" required>
-        </div>
-        <div class="field">
-          <label>Contraseña</label>
-          <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Contraseña" required>
-        </div>
-        <button class="btn primary" type="submit">Entrar</button>
-        <div class="auth-error" id="loginError"></div>
-      </form>
+      <div class="auth-flow">
+        <div class="auth-flow-item"><b>01 · Compra</b><span>Catálogo, carrito y pago desde una experiencia normal.</span></div>
+        <div class="auth-flow-item"><b>02 · Orquestación</b><span>Pedidos coordina los servicios sin exponer complejidad al usuario.</span></div>
+        <div class="auth-flow-item"><b>03 · Control</b><span>El administrador puede revisar estados, datos y conexiones.</span></div>
+      </div>
     </section>
 
-    <aside class="auth-info" style="position:static;height:auto">
-      <div class="auth-eyebrow">Credenciales válidas</div>
-      <div class="credential-list">
-        <div class="credential-card">
-          <strong>Administrador</strong>
-          <small>Panel completo, estados, pedidos, pagos, datos, flujo y conexiones.</small>
-          <div class="credential-code"><span>admin / admin</span><button class="btn small" type="button" data-demo-login="admin">Usar</button></div>
+    <section class="auth-pane">
+      <div class="auth-form-wrap">
+        <div class="auth-eyebrow">Acceso de demostración</div>
+        <h2 class="auth-title">Bienvenido de nuevo</h2>
+        <p class="auth-copy">Selecciona el tipo de experiencia y entra con las credenciales de demostración.</p>
+
+        <div class="role-choice">
+          <button class="role-option active" type="button" data-demo-login="admin">
+            <strong>Administrador</strong>
+            <small>Operación y diagnóstico</small>
+          </button>
+          <button class="role-option" type="button" data-demo-login="user">
+            <strong>Cliente</strong>
+            <small>Compra y pago</small>
+          </button>
         </div>
-        <div class="credential-card">
-          <strong>Usuario de tienda</strong>
-          <small>Experiencia normal de compra: catálogo, carrito, pago y confirmación.</small>
-          <div class="credential-code"><span>usuario / usuario</span><button class="btn small" type="button" data-demo-login="user">Usar</button></div>
-        </div>
+
+        <form id="loginForm" class="auth-form">
+          <div class="field">
+            <label>Usuario</label>
+            <input id="loginUser" autocomplete="username" value="admin" required>
+          </div>
+          <div class="field">
+            <label>Contraseña</label>
+            <input id="loginPassword" type="password" autocomplete="current-password" value="admin" required>
+          </div>
+          <button class="btn primary" id="loginSubmit" type="submit">Entrar como administrador</button>
+          <div class="auth-error" id="loginError"></div>
+        </form>
+
+        <div class="auth-demo">Credenciales demo actuales: <b id="demoCredential">admin / admin</b>. Este acceso solo controla la vista del front; no altera la configuración de microservicios.</div>
       </div>
-      <div class="note" style="margin-top:12px">Estas credenciales son solo para la demostración del front y no sustituyen un sistema real de autenticación.</div>
-    </aside>
+    </section>
   </div>
 </div>
 
@@ -840,7 +1112,7 @@
 
   <main>
     <header class="topbar">
-      <div class="path">Tienda Universitaria / <b id="title">Resumen</b></div>
+      <div class="path">Tienda Universitaria <span aria-hidden="true">/</span> <b id="title">Resumen</b></div>
       <div class="toolbar">
         <span class="role-chip" id="roleChip">Sin sesión</span>
         <button class="btn small ghost" id="probeAll">Verificar servicios</button>
@@ -883,6 +1155,19 @@
           <button class="btn" id="uxReload">Reiniciar experiencia</button>
         </div>
 
+        <div class="store-banner">
+          <div class="store-banner-copy">
+            <div class="store-banner-label">Tienda Universitaria</div>
+            <h2>Tecnología para estudiar, crear y trabajar mejor.</h2>
+            <p>Explora el catálogo, arma tu carrito y completa la compra. El sistema distribuido se encarga del resto.</p>
+          </div>
+          <div class="store-benefits">
+            <div class="store-benefit"><span>Catálogo conectado</span><span>Productos</span></div>
+            <div class="store-benefit"><span>Pago integrado</span><span>Pedidos + Pagos</span></div>
+            <div class="store-benefit"><span>Compra confirmada</span><span>Notificación</span></div>
+          </div>
+        </div>
+
         <div class="ux-progress" id="uxProgress">
           <span class="ux-progress-step active" data-ux-step="1">1 · Elige tu perfil</span>
           <span class="ux-progress-step" data-ux-step="2">2 · Elige productos</span>
@@ -893,7 +1178,7 @@
 
         <div class="ux-shell">
           <div>
-            <article class="card">
+            <article class="card profile-card">
               <h2>Tu perfil de compra</h2>
               <p class="muted" style="font-size:.8rem;margin:7px 0 13px">Para la demostración se usa un cliente real disponible en el microservicio.</p>
               <div class="field">
@@ -905,12 +1190,15 @@
             <div style="height:14px"></div>
 
             <article class="card">
-              <div class="toolbar" style="justify-content:space-between;margin-bottom:14px">
+              <div class="toolbar" style="justify-content:space-between;margin-bottom:12px">
                 <div>
                   <h2>Productos disponibles</h2>
-                  <div class="muted" style="font-size:.76rem;margin-top:4px">Agrega lo que quieras comprar.</div>
+                  <div class="muted" style="font-size:.76rem;margin-top:4px">Encuentra lo que necesitas y agrégalo al carrito.</div>
                 </div>
                 <button class="btn small" id="uxRefreshProducts">Actualizar</button>
+              </div>
+              <div class="store-tools">
+                <div class="store-search"><input id="uxSearch" type="search" placeholder="Buscar productos"></div>
               </div>
               <div id="uxCatalog" class="ux-catalog"><div class="empty" style="grid-column:1/-1">Cargando catálogo…</div></div>
             </article>
@@ -1775,20 +2063,35 @@
     var catalog = el("uxCatalog");
     if (!catalog) return;
 
-    if (!uxProducts.length) {
-      catalog.innerHTML = '<div class="empty" style="grid-column:1/-1">No hay productos disponibles en este momento.</div>';
+    var query = el("uxSearch") ? String(el("uxSearch").value || "").trim().toLowerCase() : "";
+    var visibleProducts = uxProducts.filter(function (product) {
+      return !query || productName(product).toLowerCase().indexOf(query) !== -1;
+    });
+
+    if (!visibleProducts.length) {
+      catalog.innerHTML = '<div class="empty" style="grid-column:1/-1">' +
+        (uxProducts.length ? "No encontramos productos con esa búsqueda." : "No hay productos disponibles en este momento.") +
+        '</div>';
       return;
     }
 
     var html = "";
-    uxProducts.forEach(function (product) {
+    visibleProducts.forEach(function (product) {
+      var name = productName(product);
+      var initials = name.split(/\s+/).filter(Boolean).slice(0,2).map(function (part) {
+        return part.charAt(0).toUpperCase();
+      }).join("");
+
       html += '<article class="product-card">' +
-        '<div class="product-top"><div><div class="product-name">' + escapeHtml(productName(product)) + '</div>' +
-        '<div class="product-meta">Producto de la tienda universitaria</div></div>' +
-        '<div class="product-price">' + money(productPrice(product)) + '</div></div>' +
-        '<div class="product-meta" id="uxStock-' + escapeHtml(product.id) + '">Consultando disponibilidad…</div>' +
-        '<div style="margin-top:auto"><button class="btn primary" style="width:100%" data-ux-add="' + escapeHtml(product.id) + '">Agregar al carrito</button></div>' +
-        '</article>';
+        '<div class="product-visual"><span>' + escapeHtml(initials || "TU") + '</span></div>' +
+        '<div class="product-body">' +
+          '<div class="product-top"><div><div class="product-name">' + escapeHtml(name) + '</div>' +
+          '<div class="product-meta">Producto de la tienda universitaria</div></div>' +
+          '<div class="product-price">' + money(productPrice(product)) + '</div></div>' +
+          '<div class="product-meta" id="uxStock-' + escapeHtml(product.id) + '">Consultando disponibilidad…</div>' +
+          '<div style="margin-top:auto"><button class="btn primary" style="width:100%" data-ux-add="' + escapeHtml(product.id) + '">Agregar al carrito</button></div>' +
+        '</div>' +
+      '</article>';
     });
     catalog.innerHTML = html;
 
@@ -1798,15 +2101,17 @@
       });
     });
 
-    for (var i = 0; i < uxProducts.length; i++) {
-      var product = uxProducts[i];
+    for (var i = 0; i < visibleProducts.length; i++) {
+      var product = visibleProducts[i];
       var info = await stockInfo(product.id);
       var label = el("uxStock-" + product.id);
       var button = catalog.querySelector('[data-ux-add="' + product.id + '"]');
+
       if (label) {
         label.textContent = info.text;
         label.className = "product-meta " + info.cls;
       }
+
       if (button && info.disabled) {
         button.disabled = true;
         button.textContent = "Agotado";
@@ -2058,6 +2363,10 @@
     loadUserExperience();
   });
 
+  bind("uxSearch", "input", function () {
+    renderUxProducts();
+  });
+
   bind("uxRefreshProducts", "click", async function () {
     try {
       uxProducts = rows(await api("productos", "/productos"));
@@ -2134,7 +2443,7 @@
     if (gate) gate.classList.add("hidden");
 
     var chip = el("roleChip");
-    if (chip) chip.textContent = role === "admin" ? "Administrador" : "Usuario";
+    if (chip) chip.textContent = role === "admin" ? "Administrador" : "Cliente";
 
     if (role === "user") {
       go("experiencia");
@@ -2192,13 +2501,24 @@
   document.querySelectorAll("[data-demo-login]").forEach(function (button) {
     button.addEventListener("click", function () {
       var type = button.dataset.demoLogin;
+
+      document.querySelectorAll("[data-demo-login]").forEach(function (option) {
+        option.classList.toggle("active", option.dataset.demoLogin === type);
+      });
+
       if (type === "admin") {
         el("loginUser").value = "admin";
         el("loginPassword").value = "admin";
+        if (el("loginSubmit")) el("loginSubmit").textContent = "Entrar como administrador";
+        if (el("demoCredential")) el("demoCredential").textContent = "admin / admin";
       } else {
         el("loginUser").value = "usuario";
         el("loginPassword").value = "usuario";
+        if (el("loginSubmit")) el("loginSubmit").textContent = "Entrar a la tienda";
+        if (el("demoCredential")) el("demoCredential").textContent = "usuario / usuario";
       }
+
+      if (el("loginError")) el("loginError").textContent = "";
       el("loginUser").focus();
     });
   });
