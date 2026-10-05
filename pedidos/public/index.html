@@ -39,8 +39,14 @@
     .wf-node.ok .wf-number{color:var(--good);border-color:rgba(52,211,153,.4)}.wf-node.fail .wf-number{color:var(--bad)}.wf-node.skip .wf-number{color:var(--warn)}
     .wf-service{font-weight:850;margin-top:13px}.wf-action{font-size:.75rem;color:var(--muted);line-height:1.4;margin-top:4px}.wf-endpoint{font:10px/1.45 "Cascadia Code",Consolas,monospace;color:#8aa0bd;margin-top:9px;word-break:break-all}
     .wf-state{display:inline-block;margin-top:10px;padding:4px 7px;border-radius:999px;border:1px solid #2a3548;color:var(--muted);font-size:.68rem}.wf-node.ok .wf-state{color:var(--good);border-color:rgba(52,211,153,.35)}.wf-node.fail .wf-state{color:var(--bad);border-color:rgba(251,113,133,.35)}.wf-node.skip .wf-state{color:var(--warn);border-color:rgba(251,191,36,.3)}
+    .ux-shell{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,.7fr);gap:16px;align-items:start}
+    .ux-progress{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 16px}.ux-progress-step{display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:.74rem;background:#0a0f16}.ux-progress-step.active{color:#fff;border-color:#5548a5}.ux-progress-step.done{color:var(--good);border-color:rgba(52,211,153,.35)}
+    .ux-catalog{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.product-card{border:1px solid var(--line);border-radius:16px;padding:16px;background:#0b1017;display:flex;flex-direction:column;gap:12px;min-height:190px}.product-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.product-name{font-weight:850;font-size:1.03rem}.product-price{font-size:1.45rem;font-weight:900;letter-spacing:-.04em}.product-meta{font-size:.74rem;color:var(--muted)}.stock-ok{color:var(--good)}.stock-bad{color:var(--bad)}.stock-unknown{color:var(--warn)}
+    .cart{position:sticky;top:90px}.cart-list{display:grid;gap:9px;margin:12px 0}.cart-item{border:1px solid var(--line);border-radius:12px;padding:11px;background:#0a0f16}.cart-item-head{display:flex;justify-content:space-between;gap:10px}.cart-item-name{font-weight:800;font-size:.84rem}.cart-item-price{font-size:.8rem;color:var(--muted)}.qty-row{display:flex;align-items:center;gap:8px;margin-top:9px}.qty-btn{width:30px;height:30px;border-radius:9px;border:1px solid #2b374b;background:#151d28;color:#fff;font-weight:900}.qty-value{min-width:24px;text-align:center;font-weight:800}.remove-btn{margin-left:auto;border:0;background:transparent;color:#8f9baa;font-size:.72rem}.cart-total{display:flex;justify-content:space-between;align-items:end;border-top:1px solid var(--line);padding-top:12px;margin-top:12px}.cart-total strong{font-size:1.5rem}.checkout-status{margin-top:12px;border:1px solid var(--line);border-radius:12px;padding:11px;background:#0a0f16;color:var(--muted);font-size:.78rem;line-height:1.45}.checkout-status.ok{color:var(--good);border-color:rgba(52,211,153,.35)}.checkout-status.bad{color:var(--bad);border-color:rgba(251,113,133,.35)}
+    .ux-confirm{display:none}.ux-confirm.show{display:block}.receipt{border:1px solid rgba(52,211,153,.35);background:rgba(52,211,153,.05);border-radius:16px;padding:18px}.receipt-title{font-size:1.25rem;font-weight:900}.receipt-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:13px}.receipt-cell{border:1px solid var(--line);border-radius:11px;padding:10px;background:#0a0f16}.receipt-cell small{display:block;color:var(--muted);margin-bottom:4px}
+    @media(max-width:1000px){.ux-shell{grid-template-columns:1fr}.cart{position:static}.ux-catalog{grid-template-columns:1fr 1fr}}@media(max-width:650px){.ux-catalog{grid-template-columns:1fr}.receipt-grid{grid-template-columns:1fr}}
     .toast{position:fixed;right:18px;bottom:18px;z-index:100;background:#151d29;border:1px solid #334158;padding:11px 13px;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.35);opacity:0;transform:translateY(8px);transition:.18s;pointer-events:none}.toast.show{opacity:1;transform:none}
-    @media(max-width:1100px){.s8,.s7,.s6,.s5,.s4{grid-column:span 12}.kpis{grid-template-columns:1fr 1fr}}@media(max-width:760px){.app{display:block}aside{position:fixed;left:0;right:0;top:auto;bottom:0;height:auto;z-index:50;border-right:0;border-top:1px solid var(--line);padding:7px}.brand,.side-note{display:none}.nav{grid-template-columns:repeat(5,1fr)}.nav button{padding:9px 5px;text-align:center;font-size:.68rem}.nav button:nth-child(n+6){display:none}.topbar{padding:0 14px}.content{padding:18px 12px 90px}.hero{align-items:flex-start;flex-direction:column}.form{grid-template-columns:1fr}.wide{grid-column:auto}.config-row{grid-template-columns:1fr}}
+    @media(max-width:1100px){.s8,.s7,.s6,.s5,.s4{grid-column:span 12}.kpis{grid-template-columns:1fr 1fr}}@media(max-width:760px){.app{display:block}aside{position:fixed;left:0;right:0;top:auto;bottom:0;height:auto;z-index:50;border-right:0;border-top:1px solid var(--line);padding:7px}.brand,.side-note{display:none}.nav{grid-template-columns:repeat(5,1fr)}.nav button{padding:9px 4px;text-align:center;font-size:.64rem}.nav button:nth-child(n+6){display:none}.topbar{padding:0 14px}.content{padding:18px 12px 90px}.hero{align-items:flex-start;flex-direction:column}.form{grid-template-columns:1fr}.wide{grid-column:auto}.config-row{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -51,6 +57,7 @@
       <button class="active" data-page="dashboard">Resumen</button>
       <button data-page="clientes">Clientes</button>
       <button data-page="productos">Productos</button>
+      <button data-page="experiencia">Experiencia de usuario</button>
       <button data-page="pedidos">Pedidos</button>
       <button data-page="flujo">Flujo</button>
       <button data-page="pagos">Pagos</button>
@@ -89,6 +96,93 @@
       <section id="productos" class="page">
         <div class="hero"><div><h1>Productos</h1><p class="lead">Catálogo y consulta individual del Equipo 1.</p></div><button class="btn primary" id="loadProductos">Cargar productos</button></div>
         <div class="grid"><article class="card s8"><h2>Catálogo</h2><div style="height:12px"></div><div id="productosTable" class="table"><div class="empty">Sin datos cargados.</div></div></article><article class="card s4"><h2>Buscar por ID</h2><div style="height:12px"></div><div class="field"><label>ID</label><input id="productoBuscarId" type="number" min="1" value="1"></div><div style="height:9px"></div><button class="btn" id="getProducto">GET /productos/:id</button><div style="height:11px"></div><pre id="productoOut">Sin consulta.</pre></article></div>
+      </section>
+
+
+      <section id="experiencia" class="page">
+        <div class="hero">
+          <div>
+            <h1>Probar experiencia de usuario</h1>
+            <p class="lead">Recorre la tienda como lo haría una persona normal: elegir perfil, ver productos, agregarlos al carrito y pagar. Sin rutas, JSON ni datos técnicos.</p>
+          </div>
+          <button class="btn" id="uxReload">Reiniciar experiencia</button>
+        </div>
+
+        <div class="ux-progress" id="uxProgress">
+          <span class="ux-progress-step active" data-ux-step="1">1 · Elige tu perfil</span>
+          <span class="ux-progress-step" data-ux-step="2">2 · Elige productos</span>
+          <span class="ux-progress-step" data-ux-step="3">3 · Revisa tu carrito</span>
+          <span class="ux-progress-step" data-ux-step="4">4 · Paga</span>
+          <span class="ux-progress-step" data-ux-step="5">5 · Confirmación</span>
+        </div>
+
+        <div class="ux-shell">
+          <div>
+            <article class="card">
+              <h2>¿Quién está comprando?</h2>
+              <p class="muted" style="font-size:.8rem;margin:7px 0 13px">Selecciona un cliente disponible para continuar.</p>
+              <div class="field">
+                <label>Perfil</label>
+                <select id="uxCliente"><option value="">Cargando clientes…</option></select>
+              </div>
+            </article>
+
+            <div style="height:14px"></div>
+
+            <article class="card">
+              <div class="toolbar" style="justify-content:space-between;margin-bottom:14px">
+                <div>
+                  <h2>Productos disponibles</h2>
+                  <div class="muted" style="font-size:.76rem;margin-top:4px">Agrega lo que quieras comprar.</div>
+                </div>
+                <button class="btn small" id="uxRefreshProducts">Actualizar</button>
+              </div>
+              <div id="uxCatalog" class="ux-catalog"><div class="empty" style="grid-column:1/-1">Cargando catálogo…</div></div>
+            </article>
+
+            <div style="height:14px"></div>
+
+            <article class="card ux-confirm" id="uxConfirmation">
+              <div class="receipt">
+                <div class="receipt-title">Compra completada</div>
+                <div class="muted" style="margin-top:5px">Tu pedido fue procesado correctamente.</div>
+                <div class="receipt-grid">
+                  <div class="receipt-cell"><small>Cliente</small><strong id="uxReceiptClient">—</strong></div>
+                  <div class="receipt-cell"><small>Total</small><strong id="uxReceiptTotal">—</strong></div>
+                  <div class="receipt-cell"><small>Pago</small><strong id="uxReceiptMethod">—</strong></div>
+                </div>
+                <div style="height:12px"></div>
+                <div class="note" id="uxReceiptOrders">Preparando comprobante…</div>
+                <div style="height:12px"></div>
+                <button class="btn primary" id="uxNewPurchase">Hacer otra compra</button>
+              </div>
+            </article>
+          </div>
+
+          <aside class="card cart" style="height:auto;position:sticky;padding:18px">
+            <h2>Tu carrito</h2>
+            <div id="uxCart" class="cart-list"><div class="empty">Todavía no agregas productos.</div></div>
+
+            <div class="cart-total">
+              <div><small class="muted">Total</small><div class="muted" style="font-size:.72rem">Importe estimado</div></div>
+              <strong id="uxTotal">$0.00</strong>
+            </div>
+
+            <div style="height:14px"></div>
+            <div class="field">
+              <label>Forma de pago</label>
+              <select id="uxMetodo">
+                <option value="tarjeta">Tarjeta</option>
+                <option value="transferencia">Transferencia</option>
+                <option value="efectivo">Efectivo</option>
+              </select>
+            </div>
+
+            <div style="height:12px"></div>
+            <button class="btn primary" id="uxCheckout" style="width:100%">Finalizar compra</button>
+            <div id="uxCheckoutStatus" class="checkout-status">Selecciona un perfil y agrega al menos un producto.</div>
+          </aside>
+        </div>
       </section>
 
       <section id="pedidos" class="page">
@@ -234,7 +328,7 @@
   const serviceRoot={clientes:'/clientes',productos:'/productos',pedidos:'/pedidos',pagos:'/pagos',inventario:'/inventario',notificaciones:'/notificaciones'};
   const defaults={clientes:`http://${host}:3001`,productos:`http://${host}:3002`,pedidos:location.port==='3003'?location.origin:`http://${host}:3003`,pagos:`http://${host}:3004`,inventario:`http://${host}:3005`,notificaciones:`http://${host}:3006`};
   const services=[['clientes','Clientes','E1',3001],['productos','Productos','E1',3002],['pedidos','Pedidos','E2',3003],['pagos','Pagos','E2',3004],['inventario','Inventario','E3',3005],['notificaciones','Notificaciones','E3',3006]];
-  const names={dashboard:'Resumen',clientes:'Clientes',productos:'Productos',pedidos:'Pedidos',flujo:'Flujo de trabajo',pagos:'Pagos',inventario:'Inventario',notificaciones:'Notificaciones',config:'Conexiones'};
+  const names={dashboard:'Resumen',clientes:'Clientes',productos:'Productos',experiencia:'Probar experiencia de usuario',pedidos:'Pedidos',flujo:'Flujo de trabajo',pagos:'Pagos',inventario:'Inventario',notificaciones:'Notificaciones',config:'Conexiones'};
 
   function parse(v){try{return JSON.parse(v||'{}')}catch{return{}}}
   function norm(v){return String(v||'').trim().replace(/\/+$/,'')}
@@ -276,7 +370,7 @@
   }
 
   function go(id){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));document.getElementById(id).classList.add('active');document.getElementById('title').textContent=names[id]||id;scrollTo({top:0,behavior:'smooth'})}
-  document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>go(b.dataset.page));
+  document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{go(b.dataset.page);if(b.dataset.page==='experiencia')uxLoad()});
   document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
 
   function renderServices(){
@@ -321,6 +415,377 @@
   document.getElementById('createCliente').onclick=async()=>{try{await api('clientes','/clientes',{method:'POST',body:JSON.stringify(parse(document.getElementById('clienteJson').value))});toast('Cliente enviado');table('clientesTable',await api('clientes','/clientes'))}catch(e){toast(e.message)}};
   document.getElementById('loadProductos').onclick=async()=>{try{table('productosTable',await api('productos','/productos'))}catch(e){toast(e.message)}};
   document.getElementById('getProducto').onclick=async()=>{const out=document.getElementById('productoOut');try{out.textContent=JSON.stringify(await api('productos','/productos/'+Number(document.getElementById('productoBuscarId').value)),null,2)}catch(e){out.textContent=e.message}};
+
+
+  let uxProducts=[];
+  let uxClients=[];
+  let uxCart=[];
+
+  function uxMoney(value){
+    const n=Number(value||0);
+    try{return new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN'}).format(n)}
+    catch{return 'try{table('pedidosTable',await api('pedidos','/pedidos'))}catch(e){toast(e.message)}}
+  document.getElementById('loadPedidos').onclick=loadPedidos;
+  document.getElementById('pedidoForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.currentTarget),body={clienteId:+f.get('clienteId'),productoId:+f.get('productoId'),cantidad:+f.get('cantidad'),metodoPago:f.get('metodoPago')};if(f.get('precioUnitario')!=='')body.precioUnitario=+f.get('precioUnitario');const out=document.getElementById('pedidoOut');out.textContent='Ejecutando flujo distribuido…';try{const d=await api('pedidos','/pedidos',{method:'POST',body:JSON.stringify(body)});out.textContent=JSON.stringify(d,null,2);const i=d?.integracion||{},flags=[i.clienteConsultado,i.productoConsultado,i.inventarioConsultado,true,i.pagoRegistrado,i.inventarioActualizado,i.notificacionEnviada];document.querySelectorAll('#flow .step').forEach((x,n)=>x.classList.toggle('ok',!!flags[n]));toast('Pedido creado');loadPedidos();summary();probeAll()}catch(er){out.textContent=JSON.stringify(er.data||{error:er.message},null,2);toast(er.message)}};
+
+
+  function setWorkflowStep(key,state,label){
+    const node=document.querySelector('[data-wf="'+key+'"]');
+    if(!node)return;
+    node.classList.remove('ok','fail','skip');
+    if(state)node.classList.add(state);
+    const badge=node.querySelector('.wf-state');
+    if(badge)badge.textContent=label;
+  }
+
+  function resetWorkflow(){
+    ['cliente','producto','inventarioConsulta','pedido','pago','inventarioActualiza','notificacion'].forEach(k=>setWorkflowStep(k,'','Pendiente'));
+    const g=document.getElementById('workflowGeneral');
+    if(g){g.className='pill';g.textContent='Listo para iniciar'}
+  }
+
+  async function workflowStatus(){
+    try{
+      const r=await fetch('/gateway/status');
+      const s=await r.json();
+      const map=[
+        ['cliente',s.clientes],
+        ['producto',s.productos],
+        ['inventarioConsulta',s.inventario],
+        ['pedido',s.pedidos],
+        ['pago',s.pagos],
+        ['inventarioActualiza',s.inventario],
+        ['notificacion',s.notificaciones]
+      ];
+      for(const [step,info] of map){
+        if(!info?.configured)setWorkflowStep(step,'skip','No configurado');
+        else if(info.reachable)setWorkflowStep(step,'','Disponible');
+        else setWorkflowStep(step,'fail','Sin conexión');
+      }
+      toast('Estado de servicios actualizado');
+    }catch(e){toast('No fue posible comprobar el gateway')}
+  }
+  document.getElementById('checkWorkflow').onclick=workflowStatus;
+
+  document.getElementById('workflowForm').onsubmit=async e=>{
+    e.preventDefault();
+    resetWorkflow();
+    const form=new FormData(e.currentTarget);
+    const body={
+      clienteId:+form.get('clienteId'),
+      productoId:+form.get('productoId'),
+      cantidad:+form.get('cantidad'),
+      metodoPago:form.get('metodoPago')
+    };
+    if(form.get('precioUnitario')!=='')body.precioUnitario=+form.get('precioUnitario');
+
+    const out=document.getElementById('workflowOut');
+    const general=document.getElementById('workflowGeneral');
+    general.className='pill test';general.textContent='Ejecutando flujo…';
+    setWorkflowStep('pedido','','Orquestando…');
+    out.textContent='Enviando POST /pedidos. El microservicio Pedidos está coordinando el resto de servicios...';
+
+    let status={};
+    try{
+      const sr=await fetch('/gateway/status');
+      status=await sr.json();
+    }catch{}
+
+    try{
+      const data=await api('pedidos','/pedidos',{method:'POST',body:JSON.stringify(body)});
+      const i=data?.integracion||{};
+
+      setWorkflowStep('cliente',i.clienteConsultado?'ok':(status.clientes?.configured?'fail':'skip'),i.clienteConsultado?'Validado':(status.clientes?.configured?'No completado':'Omitido'));
+      setWorkflowStep('producto',i.productoConsultado?'ok':(status.productos?.configured?'fail':'skip'),i.productoConsultado?'Consultado':(status.productos?.configured?'No completado':'Omitido'));
+      setWorkflowStep('inventarioConsulta',i.inventarioConsultado?'ok':(status.inventario?.configured?'fail':'skip'),i.inventarioConsultado?'Existencia verificada':(status.inventario?.configured?'No completado':'Omitido'));
+      setWorkflowStep('pedido',data?.pedido?'ok':'fail',data?.pedido?'Pedido creado':'No creado');
+      setWorkflowStep('pago',i.pagoRegistrado?'ok':'fail',i.pagoRegistrado?'Pago aprobado':'No completado');
+      setWorkflowStep('inventarioActualiza',i.inventarioActualizado?'ok':(status.inventario?.configured?'fail':'skip'),i.inventarioActualizado?'Stock actualizado':(status.inventario?.configured?'No completado':'Omitido'));
+      setWorkflowStep('notificacion',i.notificacionEnviada?'ok':(status.notificaciones?.configured?'fail':'skip'),i.notificacionEnviada?'Mensaje registrado':(status.notificaciones?.configured?'No completado':'Omitido'));
+
+      const allConfigured=['clientes','productos','inventario','notificaciones'].every(k=>status[k]?.configured);
+      const allDone=i.clienteConsultado&&i.productoConsultado&&i.inventarioConsultado&&i.pagoRegistrado&&i.inventarioActualizado&&i.notificacionEnviada;
+      general.className='pill '+(allDone?'ok':(allConfigured?'bad':'test'));
+      general.textContent=allDone?'Flujo completo':(allConfigured?'Flujo incompleto':'Flujo parcial');
+
+      out.textContent=JSON.stringify({
+        demostracion:'Flujo de microservicios',
+        pedido:data.pedido,
+        pago:data.pago,
+        pasos:{
+          clientes:i.clienteConsultado,
+          productos:i.productoConsultado,
+          inventarioConsulta:i.inventarioConsultado,
+          pedido:Boolean(data.pedido),
+          pagos:i.pagoRegistrado,
+          inventarioActualizacion:i.inventarioActualizado,
+          notificaciones:i.notificacionEnviada
+        },
+        advertencia:data.advertenciaNotificacion||null
+      },null,2);
+
+      toast(allDone?'Flujo completo ejecutado':'Flujo ejecutado; revisa los pasos');
+      loadPedidos();summary();probeAll();
+    }catch(er){
+      const d=er.data||{};
+      const i=d.integracion||{};
+      setWorkflowStep('cliente',i.clienteConsultado?'ok':(status.clientes?.configured?'fail':'skip'),i.clienteConsultado?'Validado':(status.clientes?.configured?'Falló':'Omitido'));
+      setWorkflowStep('producto',i.productoConsultado?'ok':(status.productos?.configured?'fail':'skip'),i.productoConsultado?'Consultado':(status.productos?.configured?'Falló':'Omitido'));
+      setWorkflowStep('inventarioConsulta',i.inventarioConsultado?'ok':(status.inventario?.configured?'fail':'skip'),i.inventarioConsultado?'Verificado':(status.inventario?.configured?'Falló':'Omitido'));
+      setWorkflowStep('pedido',d.pedido?'ok':'fail',d.pedido?'Pedido creado':'Interrumpido');
+      setWorkflowStep('pago',i.pagoRegistrado?'ok':'fail',i.pagoRegistrado?'Pago aprobado':'No completado');
+      setWorkflowStep('inventarioActualiza',i.inventarioActualizado?'ok':(status.inventario?.configured?'fail':'skip'),i.inventarioActualizado?'Actualizado':(status.inventario?.configured?'No completado':'Omitido'));
+      setWorkflowStep('notificacion',i.notificacionEnviada?'ok':(status.notificaciones?.configured?'fail':'skip'),i.notificacionEnviada?'Registrada':(status.notificaciones?.configured?'No completado':'Omitido'));
+      general.className='pill bad';general.textContent='Flujo interrumpido';
+      out.textContent=JSON.stringify(d.error?d:{error:er.message},null,2);
+      toast('El flujo se interrumpió; revisa el paso marcado');
+    }
+  };
+
+  async function loadPagos(){try{table('pagosTable',await api('pagos','/pagos'))}catch(e){toast(e.message)}}
+  document.getElementById('loadPagos').onclick=loadPagos;
+  document.getElementById('createPago').onclick=async()=>{try{await api('pagos','/pagos',{method:'POST',body:JSON.stringify({pedidoId:+document.getElementById('pagoPedidoId').value,monto:+document.getElementById('pagoMonto').value,metodo:document.getElementById('pagoMetodo').value})});toast('Pago registrado');loadPagos()}catch(e){toast(e.message)}};
+
+  document.getElementById('getInventario').onclick=async()=>{const out=document.getElementById('inventarioOut');try{out.textContent=JSON.stringify(await api('inventario','/inventario/'+Number(document.getElementById('invId').value)),null,2)}catch(e){out.textContent=e.message}};
+  document.getElementById('updateInventario').onclick=async()=>{const id=+document.getElementById('invUpdateId').value,existencia=+document.getElementById('invStock').value;try{document.getElementById('inventarioOut').textContent=JSON.stringify(await api('inventario','/inventario/'+id,{method:'PUT',body:JSON.stringify({existencia,cantidad:existencia})}),null,2);toast('Inventario actualizado')}catch(e){toast(e.message)}};
+  document.getElementById('sendNotif').onclick=async()=>{const out=document.getElementById('notifOut');try{out.textContent=JSON.stringify(await api('notificaciones','/notificaciones',{method:'POST',body:JSON.stringify(parse(document.getElementById('notifJson').value))}),null,2);toast('Notificación enviada')}catch(e){out.textContent=e.message;toast(e.message)}};
+
+  function renderConfig(){
+    document.getElementById('configFields').innerHTML=services.map(([k,n,t,p])=>`<div class="config-row"><div><b>${n}</b><div class="muted" style="font-size:.71rem">${t} · :${p}</div></div><div class="field"><label>URL base de referencia</label><input data-config="${k}" value="${esc(config[k])}"></div><button class="btn small" data-test="${k}">Probar</button></div>`).join('');
+    document.querySelectorAll('[data-test]').forEach(b=>b.onclick=async()=>{save(false);await probeAll();toast('Prueba realizada desde el gateway')});
+  }
+  function save(show=true){
+    document.querySelectorAll('[data-config]').forEach(x=>config[x.dataset.config]=cleanBase(x.dataset.config,x.value));
+    localStorage.setItem('tu-microservices-config',JSON.stringify(config));renderServices();renderConfig();
+    if(show)toast('Referencias guardadas. Para el gateway cambia también el archivo .env.');
+  }
+  document.getElementById('saveConfig').onclick=()=>save(true);
+  document.getElementById('resetConfig').onclick=()=>{config={...defaults};localStorage.removeItem('tu-microservices-config');renderConfig();renderServices();toast('Referencias restablecidas')};
+
+  renderServices();renderConfig();summary();probeAll();
+})();
+</script>
+</body>
+</html>+n.toFixed(2)}
+  }
+
+  function uxProductPrice(p){
+    return Number(p?.precio ?? p?.precio_unitario ?? p?.price ?? p?.costo ?? 0);
+  }
+
+  function uxProductName(p){
+    return p?.nombre ?? p?.name ?? p?.producto ?? ('Producto '+(p?.id ?? ''));
+  }
+
+  function uxClientName(c){
+    return c?.nombre ?? c?.name ?? c?.cliente ?? c?.correo ?? c?.email ?? ('Cliente '+(c?.id ?? ''));
+  }
+
+  function uxSetStep(step){
+    document.querySelectorAll('[data-ux-step]').forEach(el=>{
+      const n=Number(el.dataset.uxStep);
+      el.classList.toggle('done',n<step);
+      el.classList.toggle('active',n===step);
+    });
+  }
+
+  function uxRenderClients(){
+    const select=document.getElementById('uxCliente');
+    if(!uxClients.length){
+      select.innerHTML='<option value="">No hay clientes disponibles</option>';
+      return;
+    }
+    const current=select.value;
+    select.innerHTML='<option value="">Selecciona tu perfil</option>'+uxClients.map(c=>`<option value="${esc(c.id)}">${esc(uxClientName(c))}${c.correo||c.email?' · '+esc(c.correo||c.email):''}</option>`).join('');
+    if(current)select.value=current;
+  }
+
+  async function uxStockLabel(productId){
+    try{
+      const d=await api('inventario','/inventario/'+productId);
+      const stock=Number(d?.existencia ?? d?.stock ?? d?.cantidad ?? d?.data?.existencia);
+      if(Number.isFinite(stock))return stock>0?{text:stock+' disponibles',cls:'stock-ok',disabled:false}:{text:'Agotado',cls:'stock-bad',disabled:true};
+    }catch{}
+    return {text:'Disponibilidad por confirmar',cls:'stock-unknown',disabled:false};
+  }
+
+  async function uxRenderProducts(){
+    const catalog=document.getElementById('uxCatalog');
+    if(!uxProducts.length){
+      catalog.innerHTML='<div class="empty" style="grid-column:1/-1">No hay productos disponibles en este momento.</div>';
+      return;
+    }
+
+    catalog.innerHTML=uxProducts.map(p=>{
+      const price=uxProductPrice(p);
+      return `<article class="product-card">
+        <div class="product-top">
+          <div>
+            <div class="product-name">${esc(uxProductName(p))}</div>
+            <div class="product-meta">Producto de la tienda universitaria</div>
+          </div>
+          <div class="product-price">${uxMoney(price)}</div>
+        </div>
+        <div class="product-meta" id="uxStock-${esc(p.id)}">Consultando disponibilidad…</div>
+        <div style="margin-top:auto">
+          <button class="btn primary" style="width:100%" data-ux-add="${esc(p.id)}">Agregar al carrito</button>
+        </div>
+      </article>`;
+    }).join('');
+
+    catalog.querySelectorAll('[data-ux-add]').forEach(btn=>btn.onclick=()=>uxAdd(Number(btn.dataset.uxAdd)));
+
+    for(const p of uxProducts){
+      const s=await uxStockLabel(p.id);
+      const label=document.getElementById('uxStock-'+p.id);
+      const btn=catalog.querySelector('[data-ux-add="'+p.id+'"]');
+      if(label){label.textContent=s.text;label.className='product-meta '+s.cls}
+      if(btn&&s.disabled){btn.disabled=true;btn.textContent='Agotado'}
+    }
+  }
+
+  function uxAdd(id){
+    const p=uxProducts.find(x=>Number(x.id)===Number(id));
+    if(!p)return;
+    const existing=uxCart.find(x=>Number(x.id)===Number(id));
+    if(existing)existing.qty+=1;
+    else uxCart.push({id:Number(p.id),name:uxProductName(p),price:uxProductPrice(p),qty:1});
+    uxRenderCart();
+    uxSetStep(3);
+    toast('Producto agregado al carrito');
+  }
+
+  function uxChangeQty(id,delta){
+    const item=uxCart.find(x=>x.id===id);
+    if(!item)return;
+    item.qty+=delta;
+    if(item.qty<=0)uxCart=uxCart.filter(x=>x.id!==id);
+    uxRenderCart();
+  }
+
+  function uxRemove(id){
+    uxCart=uxCart.filter(x=>x.id!==id);
+    uxRenderCart();
+  }
+
+  function uxTotalValue(){
+    return uxCart.reduce((sum,item)=>sum+(item.price*item.qty),0);
+  }
+
+  function uxRenderCart(){
+    const wrap=document.getElementById('uxCart');
+    if(!uxCart.length){
+      wrap.innerHTML='<div class="empty">Todavía no agregas productos.</div>';
+      document.getElementById('uxTotal').textContent=uxMoney(0);
+      document.getElementById('uxCheckoutStatus').className='checkout-status';
+      document.getElementById('uxCheckoutStatus').textContent='Selecciona un perfil y agrega al menos un producto.';
+      uxSetStep(document.getElementById('uxCliente').value?2:1);
+      return;
+    }
+
+    wrap.innerHTML=uxCart.map(item=>`<div class="cart-item">
+      <div class="cart-item-head">
+        <div>
+          <div class="cart-item-name">${esc(item.name)}</div>
+          <div class="cart-item-price">${uxMoney(item.price)} c/u</div>
+        </div>
+        <button class="remove-btn" data-ux-remove="${item.id}">Quitar</button>
+      </div>
+      <div class="qty-row">
+        <button class="qty-btn" data-ux-minus="${item.id}">−</button>
+        <span class="qty-value">${item.qty}</span>
+        <button class="qty-btn" data-ux-plus="${item.id}">+</button>
+        <span class="cart-item-price" style="margin-left:auto">${uxMoney(item.price*item.qty)}</span>
+      </div>
+    </div>`).join('');
+
+    wrap.querySelectorAll('[data-ux-minus]').forEach(b=>b.onclick=()=>uxChangeQty(Number(b.dataset.uxMinus),-1));
+    wrap.querySelectorAll('[data-ux-plus]').forEach(b=>b.onclick=()=>uxChangeQty(Number(b.dataset.uxPlus),1));
+    wrap.querySelectorAll('[data-ux-remove]').forEach(b=>b.onclick=()=>uxRemove(Number(b.dataset.uxRemove)));
+    document.getElementById('uxTotal').textContent=uxMoney(uxTotalValue());
+    document.getElementById('uxCheckoutStatus').className='checkout-status';
+    document.getElementById('uxCheckoutStatus').textContent=document.getElementById('uxCliente').value?'Listo para pagar.':'Selecciona tu perfil para continuar.';
+  }
+
+  async function uxLoad(){
+    uxCart=[];
+    uxSetStep(1);
+    document.getElementById('uxConfirmation').classList.remove('show');
+    document.getElementById('uxCheckoutStatus').className='checkout-status';
+    document.getElementById('uxCheckoutStatus').textContent='Cargando información de la tienda…';
+    try{
+      const [clients,products]=await Promise.all([api('clientes','/clientes'),api('productos','/productos')]);
+      uxClients=rows(clients);
+      uxProducts=rows(products);
+      uxRenderClients();
+      await uxRenderProducts();
+      uxRenderCart();
+    }catch(e){
+      document.getElementById('uxCatalog').innerHTML='<div class="empty" style="grid-column:1/-1">No fue posible cargar la tienda. Revisa la conexión de Clientes y Productos.</div>';
+      document.getElementById('uxCheckoutStatus').className='checkout-status bad';
+      document.getElementById('uxCheckoutStatus').textContent='La tienda no está disponible por el momento.';
+    }
+  }
+
+  document.getElementById('uxCliente').onchange=()=>{
+    uxSetStep(document.getElementById('uxCliente').value?(uxCart.length?3:2):1);
+    uxRenderCart();
+  };
+
+  document.getElementById('uxMetodo').onchange=()=>{
+    if(uxCart.length&&document.getElementById('uxCliente').value)uxSetStep(4);
+  };
+
+  document.getElementById('uxCheckout').onclick=async()=>{
+    const clienteId=Number(document.getElementById('uxCliente').value);
+    if(!clienteId){toast('Selecciona tu perfil antes de pagar');uxSetStep(1);return}
+    if(!uxCart.length){toast('Agrega al menos un producto');uxSetStep(2);return}
+
+    uxSetStep(4);
+    const button=document.getElementById('uxCheckout');
+    const status=document.getElementById('uxCheckoutStatus');
+    const metodo=document.getElementById('uxMetodo').value;
+    button.disabled=true;button.textContent='Procesando compra…';
+    status.className='checkout-status';status.textContent='Estamos procesando tu compra. No cierres esta página.';
+
+    const results=[];
+    try{
+      for(const item of uxCart){
+        const body={clienteId,productoId:item.id,cantidad:item.qty,metodoPago:metodo};
+        if(Number.isFinite(item.price)&&item.price>=0)body.precioUnitario=item.price;
+        const result=await api('pedidos','/pedidos',{method:'POST',body:JSON.stringify(body)});
+        results.push(result);
+      }
+
+      const client=uxClients.find(c=>Number(c.id)===clienteId);
+      const total=uxTotalValue();
+      document.getElementById('uxReceiptClient').textContent=client?uxClientName(client):'Cliente';
+      document.getElementById('uxReceiptTotal').textContent=uxMoney(total);
+      document.getElementById('uxReceiptMethod').textContent=metodo.charAt(0).toUpperCase()+metodo.slice(1);
+      const orderIds=results.map(r=>r?.pedido?.id).filter(Boolean);
+      document.getElementById('uxReceiptOrders').innerHTML='<b style="color:#fff">Pedido confirmado.</b> '+(orderIds.length?'Folio'+(orderIds.length>1?'s':'')+': '+orderIds.join(', ')+'. ':'')+'El pago fue procesado y tu compra quedó registrada.';
+      document.getElementById('uxConfirmation').classList.add('show');
+      status.className='checkout-status ok';status.textContent='Compra completada correctamente.';
+      uxSetStep(5);
+      uxCart=[];
+      uxRenderCart();
+      document.getElementById('uxConfirmation').scrollIntoView({behavior:'smooth',block:'center'});
+      toast('Compra completada');
+      summary();probeAll();
+    }catch(e){
+      status.className='checkout-status bad';
+      status.textContent='No pudimos completar la compra. '+(e?.data?.error||e.message||'Intenta nuevamente.');
+      toast('No se pudo completar la compra');
+    }finally{
+      button.disabled=false;button.textContent='Finalizar compra';
+    }
+  };
+
+  document.getElementById('uxReload').onclick=uxLoad;
+  document.getElementById('uxRefreshProducts').onclick=async()=>{
+    try{uxProducts=rows(await api('productos','/productos'));await uxRenderProducts();toast('Catálogo actualizado')}catch(e){toast('No se pudo actualizar el catálogo')}
+  };
+  document.getElementById('uxNewPurchase').onclick=uxLoad;
 
   async function loadPedidos(){try{table('pedidosTable',await api('pedidos','/pedidos'))}catch(e){toast(e.message)}}
   document.getElementById('loadPedidos').onclick=loadPedidos;
