@@ -155,3 +155,24 @@ La demostración continua es:
 Internamente, el front sigue consumiendo los microservicios reales. Si hay varios productos en el carrito, se generan los pedidos correspondientes de forma secuencial y la interfaz los agrupa como una sola experiencia de compra.
 
 Esta vista está pensada para mostrar el sistema desde la perspectiva de un usuario final; la pestaña **Flujo** queda disponible para explicar después qué microservicios participaron por detrás.
+
+
+### Contrato real de Notificaciones
+
+El microservicio de Notificaciones espera que Pagos envíe una petición `POST /notificaciones` con este formato:
+
+```json
+{
+  "origen": "pagos",
+  "mensaje": "Pago aprobado y compra realizada con exito",
+  "tipo": "SUCCESS"
+}
+```
+
+El Equipo 2 conserva `NOTIFICACIONES_URL` como variable de entorno; no se fija la IP en el código. Si el servicio de Notificaciones está en `192.200.5.142:3006`, configura localmente:
+
+```env
+NOTIFICACIONES_URL=http://192.200.5.142:3006
+```
+
+Pagos envía la notificación después de confirmar el pago.
