@@ -210,6 +210,91 @@ async function getServiceRecord(baseUrl, resourceName, id) {
   return record;
 }
 
+async function createClientRecord(input) {
+  if (!CLIENTES_URL) {
+    const error = new Error('Servicio de clientes no configurado');
+    error.status = 503;
+    throw error;
+  }
+
+  const nombre = String(
+    firstDefined(input && input.nombre, input && input.name, input && input.nombreCompleto) || ''
+  ).trim();
+  const correo = String(
+    firstDefined(
+      input && input.correo,
+      input && input.email,
+      input && input.correoElectronico
+    ) || ''
+  ).trim();
+
+  if (!nombre) {
+    const error = new Error('El nombre es obligatorio');
+    error.status = 400;
+    throw error;
+  }
+
+  if (!correo) {
+    const error = new Error('El correo es obligatorio');
+    error.status = 400;
+    throw error;
+  }
+
+  let sample = null;
+  try {
+    const current = await requestJson(CLIENTES_URL + '/clientes');
+    sample = extractCollection(current)[0] || null;
+  } catch {
+    // La creación puede seguir funcionando aunque la consulta previa falle.
+  }
+
+  const candidates = [];
+
+  function addCandidate(payload) {
+    const signature = JSON.stringify(payload);
+    if (!candidates.some((item) => JSON.stringify(item) === signature)) {
+      candidates.push(payload);
+    }
+  }
+
+  // Prioriza el esquema que ya usa el servicio si podemos inferirlo.
+  if (sample && Object.prototype.hasOwnProperty.call(sample, 'email')) {
+    addCandidate({ nombre, email: correo });
+  }
+  if (sample && Object.prototype.hasOwnProperty.call(sample, 'correo')) {
+    addCandidate({ nombre, correo });
+  }
+  if (sample && Object.prototype.hasOwnProperty.call(sample, 'name')) {
+    addCandidate({ name: nombre, email: correo });
+  }
+
+  // Compatibilidad con los formatos más comunes usados por los equipos.
+  addCandidate({ nombre, correo });
+  addCandidate({ nombre, email: correo });
+  addCandidate({ name: nombre, email: correo });
+  addCandidate({ nombreCompleto: nombre, correoElectronico: correo });
+
+  let lastError = null;
+
+  for (const payload of candidates) {
+    try {
+      return await requestJson(CLIENTES_URL + '/clientes', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+    } catch (error) {
+      lastError = error;
+
+      // Solo prueba otra estructura si el servidor rechazó los datos.
+      if (![400, 422].includes(error.status)) {
+        throw error;
+      }
+    }
+  }
+
+  throw lastError || new Error('No fue posible crear el cliente');
+}
+
 function findInventoryRecord(payload, productoId) {
   if (!payload || typeof payload !== 'object') return null;
 
@@ -633,12 +718,18 @@ app.get('/gateway/clientes/:id', async (req, res) => {
   }
 });
 
-app.post('/gateway/clientes', (req, res) =>
-  gatewayRequest(res, CLIENTES_URL, 'clientes', '/clientes', {
-    method: 'POST',
-    body: JSON.stringify(req.body)
-  })
-);
+app.post('/gateway/clientes', async (req, res) => {
+  try {
+    const cliente = await createClientRecord(req.body);
+    return res.status(201).json(cliente);
+  } catch (error) {
+    return res.status(error.status || 502).json({
+      error: 'No fue posible agregar el cliente',
+      detalle: error.message,
+      upstream: error.data || null
+    });
+  }
+});
 
 app.get('/gateway/productos', (req, res) =>
   gatewayRequest(res, PRODUCTOS_URL, 'productos', '/productos')
