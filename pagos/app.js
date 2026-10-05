@@ -69,14 +69,13 @@ async function notifyApprovedPayment(pago) {
       body: JSON.stringify({
         tipo: 'PAGO_APROBADO',
         pedidoId: Number(pago.pedido_id),
-        pagoId: Number(pago.id),
-        monto: Number(pago.monto),
-        metodo: pago.metodo_pago,
         mensaje:
           'Pago aprobado para el pedido ' +
           pago.pedido_id +
           ' por $' +
-          Number(pago.monto).toFixed(2)
+          Number(pago.monto).toFixed(2) +
+          ' mediante ' +
+          pago.metodo_pago
       })
     });
 
