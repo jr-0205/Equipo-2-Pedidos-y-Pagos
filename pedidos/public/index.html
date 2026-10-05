@@ -565,6 +565,106 @@
     }
     .receipt-cell small{display:block;color:#747881;font-size:.65rem;margin-bottom:4px}
 
+    .nav-inline{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%}
+    .nav-badge{
+      min-width:20px;height:20px;padding:0 6px;
+      display:inline-flex;align-items:center;justify-content:center;
+      border-radius:999px;
+      background:rgba(124,108,246,.13);
+      border:1px solid rgba(124,108,246,.25);
+      color:#b8b1ff;
+      font-size:.61rem;font-weight:850;
+    }
+    .section-head{
+      display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px
+    }
+    .section-head p{margin:5px 0 0;color:var(--muted);font-size:.74rem;line-height:1.5}
+    .lookup-result{
+      min-height:150px;
+      display:grid;
+      align-content:center;
+      border:1px solid var(--line);
+      border-radius:10px;
+      background:#0a0c0f;
+      padding:14px;
+      color:#9da1aa;
+    }
+    .lookup-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:9px;
+      width:100%;
+    }
+    .lookup-cell{
+      border:1px solid var(--line);
+      border-radius:9px;
+      padding:11px;
+      background:#0d0f12;
+    }
+    .lookup-cell small{display:block;color:#727780;font-size:.64rem;margin-bottom:4px}
+    .lookup-cell strong{display:block;color:#f1f2f4;font-size:.88rem;word-break:break-word}
+    .friendly-form{display:grid;gap:11px}
+    .friendly-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .status-card{
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:14px;
+      background:#0a0c0f;
+    }
+    .status-card.ok{border-color:rgba(57,217,138,.25);background:rgba(57,217,138,.035)}
+    .status-card.bad{border-color:rgba(255,107,122,.27);background:rgba(255,107,122,.035)}
+    .status-title{font-size:.9rem;font-weight:850}
+    .status-copy{margin-top:5px;color:#8d929d;font-size:.72rem;line-height:1.5}
+    .status-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}
+    .status-metric{border:1px solid var(--line);border-radius:8px;padding:9px;background:#0b0d10}
+    .status-metric small{display:block;color:#6f747d;font-size:.61rem;margin-bottom:3px}
+    .status-metric strong{font-size:.76rem;color:#e8e9ec}
+    details.tech-details{margin-top:10px}
+    details.tech-details summary{cursor:pointer;color:#777c86;font-size:.67rem}
+    details.tech-details pre{margin-top:8px;min-height:120px}
+    .notification-list{display:grid;gap:8px}
+    .notification-item{
+      display:grid;
+      grid-template-columns:38px minmax(0,1fr) auto;
+      gap:11px;
+      align-items:start;
+      padding:12px;
+      border:1px solid var(--line);
+      border-radius:10px;
+      background:#0b0d10;
+    }
+    .notification-icon{
+      width:38px;height:38px;border-radius:10px;
+      display:grid;place-items:center;
+      background:rgba(124,108,246,.10);
+      border:1px solid rgba(124,108,246,.18);
+      color:#b6afff;font-size:.68rem;font-weight:900;
+    }
+    .notification-title{font-size:.79rem;font-weight:800}
+    .notification-message{margin-top:3px;color:#8d929d;font-size:.7rem;line-height:1.45}
+    .notification-meta{margin-top:6px;color:#616772;font-size:.63rem}
+    .notification-time{color:#646a74;font-size:.62rem;white-space:nowrap}
+    .empty-state{
+      text-align:center;
+      padding:34px 18px;
+      border:1px dashed var(--line);
+      border-radius:10px;
+      color:#747983;
+      font-size:.74rem;
+      background:#0a0c0f;
+    }
+    .query-help{
+      display:flex;align-items:flex-start;gap:8px;
+      margin-top:10px;padding:9px 10px;border-radius:8px;
+      background:#0b0d10;border:1px solid var(--line);
+      color:#757a84;font-size:.67rem;line-height:1.45;
+    }
+    @media(max-width:760px){
+      .lookup-grid,.status-grid{grid-template-columns:1fr 1fr}
+      .notification-item{grid-template-columns:34px minmax(0,1fr)}
+      .notification-time{grid-column:2}
+    }
+
     .toast{
       position:fixed;
       right:18px;
@@ -1102,7 +1202,7 @@
       <button data-page="clientes">Clientes</button>
       <button data-page="productos">Productos</button>
       <button data-page="inventario">Inventario</button>
-      <button data-page="notificaciones">Notificaciones</button>
+      <button data-page="notificaciones"><span class="nav-inline"><span>Notificaciones</span><span class="nav-badge" id="notifCount">0</span></span></button>
 
       <div class="nav-group">Sistema</div>
       <button data-page="config">Conexiones</button>
@@ -1133,16 +1233,45 @@
       </section>
 
       <section id="clientes" class="page">
-        <div class="hero"><div><h1>Clientes</h1><p class="lead">Consulta y alta del microservicio del Equipo 1.</p></div><button class="btn primary" id="loadClientes">Cargar clientes</button></div>
-        <div class="grid"><article class="card s8"><h2>Listado</h2><div style="height:12px"></div><div id="clientesTable" class="table"><div class="empty">Sin datos cargados.</div></div></article><article class="card s4"><h2>Crear cliente</h2><p class="muted" style="font-size:.78rem">JSON editable para adaptarse al esquema del Equipo 1.</p><textarea id="clienteJson">{
-  "nombre": "Ana López",
-  "correo": "ana@universidad.mx"
-}</textarea><div style="height:9px"></div><button class="btn primary" id="createCliente">POST /clientes</button></article></div>
+        <div class="hero">
+          <div><h1>Clientes</h1><p class="lead">Consulta las personas registradas y agrega nuevos clientes sin usar formatos técnicos.</p></div>
+          <button class="btn" id="loadClientes">Actualizar</button>
+        </div>
+        <div class="grid">
+          <article class="card s8">
+            <div class="section-head"><div><h2>Directorio de clientes</h2><p>Información obtenida del servicio de clientes.</p></div></div>
+            <div id="clientesTable" class="table"><div class="empty">Presiona Actualizar para consultar los clientes.</div></div>
+          </article>
+          <article class="card s4">
+            <div class="section-head"><div><h2>Agregar cliente</h2><p>Captura los datos básicos del nuevo cliente.</p></div></div>
+            <form id="clienteForm" class="friendly-form">
+              <div class="field"><label>Nombre</label><input id="clienteNombre" placeholder="Ej. Ana López" required></div>
+              <div class="field"><label>Correo electrónico</label><input id="clienteCorreo" type="email" placeholder="ana@universidad.mx" required></div>
+              <button class="btn primary" type="submit">Guardar cliente</button>
+            </form>
+          </article>
+        </div>
       </section>
 
       <section id="productos" class="page">
-        <div class="hero"><div><h1>Productos</h1><p class="lead">Catálogo y consulta individual del Equipo 1.</p></div><button class="btn primary" id="loadProductos">Cargar productos</button></div>
-        <div class="grid"><article class="card s8"><h2>Catálogo</h2><div style="height:12px"></div><div id="productosTable" class="table"><div class="empty">Sin datos cargados.</div></div></article><article class="card s4"><h2>Buscar por ID</h2><div style="height:12px"></div><div class="field"><label>ID</label><input id="productoBuscarId" type="number" min="1" value="1"></div><div style="height:9px"></div><button class="btn" id="getProducto">GET /productos/:id</button><div style="height:11px"></div><pre id="productoOut">Sin consulta.</pre></article></div>
+        <div class="hero">
+          <div><h1>Productos</h1><p class="lead">Consulta el catálogo y revisa la información de un producto de forma sencilla.</p></div>
+          <button class="btn" id="loadProductos">Actualizar catálogo</button>
+        </div>
+        <div class="grid">
+          <article class="card s8">
+            <div class="section-head"><div><h2>Catálogo</h2><p>Productos disponibles en el servicio del Equipo 1.</p></div></div>
+            <div id="productosTable" class="table"><div class="empty">Presiona Actualizar catálogo para consultar los productos.</div></div>
+          </article>
+          <article class="card s4">
+            <div class="section-head"><div><h2>Consultar producto</h2><p>Escribe el número del producto que quieres revisar.</p></div></div>
+            <div class="field"><label>Número de producto</label><input id="productoBuscarId" type="number" min="1" value="1"></div>
+            <div style="height:9px"></div>
+            <button class="btn primary" id="getProducto" style="width:100%">Buscar producto</button>
+            <div style="height:11px"></div>
+            <div class="lookup-result" id="productoOut">Aquí aparecerá la información del producto.</div>
+          </article>
+        </div>
       </section>
 
 
@@ -1260,7 +1389,7 @@
             <button class="btn primary wide">Crear pedido</button>
           </form><div style="height:11px"></div><div class="note"><b style="color:#fff">Backend:</b> el servicio pedidos usa las URLs configuradas en <span class="code">.env</span> para integrarse con los demás equipos.</div></article>
           <article class="card s7"><h2>Pedidos registrados</h2><div style="height:12px"></div><div id="pedidosTable" class="table"><div class="empty">Sin datos cargados.</div></div></article>
-          <article class="card s12"><h2>Resultado de integración</h2><div style="height:12px"></div><pre id="pedidoOut">Esperando un pedido.</pre></article>
+          <article class="card s12"><div class="section-head"><div><h2>Resultado del pedido</h2><p>Resumen entendible de lo que ocurrió durante la operación.</p></div></div><div id="pedidoOut" class="lookup-result">Crea un pedido para ver el resultado.</div></article>
         </div>
       </section>
 
@@ -1363,17 +1492,61 @@
       </section>
 
       <section id="inventario" class="page">
-        <div class="hero"><div><h1>Inventario</h1><p class="lead">Consulta y actualización de existencias del Equipo 3.</p></div></div>
-        <div class="grid"><article class="card s6"><h2>Consultar existencia</h2><div style="height:12px"></div><div class="field"><label>Producto ID</label><input id="invId" type="number" min="1" value="1"></div><div style="height:9px"></div><button class="btn primary" id="getInventario">GET /inventario/:productoId</button><div style="height:11px"></div><pre id="inventarioOut">Sin consulta.</pre></article><article class="card s6"><h2>Actualizar existencia</h2><div style="height:12px"></div><div class="field"><label>Producto ID</label><input id="invUpdateId" type="number" min="1" value="1"></div><div style="height:9px"></div><div class="field"><label>Nueva existencia</label><input id="invStock" type="number" min="0" value="10"></div><div style="height:9px"></div><button class="btn" id="updateInventario">PUT /inventario/:productoId</button></article></div>
+        <div class="hero">
+          <div><h1>Inventario</h1><p class="lead">Revisa existencias y actualiza la cantidad disponible sin necesidad de conocer la API.</p></div>
+        </div>
+        <div class="grid">
+          <article class="card s6">
+            <div class="section-head"><div><h2>Consultar existencia</h2><p>Busca un producto para conocer su disponibilidad actual.</p></div></div>
+            <div class="field"><label>Número de producto</label><input id="invId" type="number" min="1" value="1"></div>
+            <div style="height:9px"></div>
+            <button class="btn primary" id="getInventario" style="width:100%">Consultar disponibilidad</button>
+            <div style="height:11px"></div>
+            <div class="lookup-result" id="inventarioOut">Aquí aparecerá la existencia del producto.</div>
+          </article>
+          <article class="card s6">
+            <div class="section-head"><div><h2>Actualizar existencia</h2><p>Define la nueva cantidad disponible para un producto.</p></div></div>
+            <div class="friendly-form">
+              <div class="field"><label>Número de producto</label><input id="invUpdateId" type="number" min="1" value="1"></div>
+              <div class="field"><label>Nueva existencia</label><input id="invStock" type="number" min="0" value="10"></div>
+              <button class="btn" id="updateInventario">Guardar existencia</button>
+            </div>
+            <div class="query-help">El sistema se encarga de traducir esta acción al formato que utiliza el microservicio de inventario.</div>
+          </article>
+        </div>
       </section>
 
       <section id="notificaciones" class="page">
-        <div class="hero"><div><h1>Notificaciones</h1><p class="lead">Envía mensajes al microservicio del Equipo 3.</p></div></div>
-        <div class="grid"><article class="card s6"><h2>Nueva notificación</h2><p class="muted" style="font-size:.78rem">JSON editable para compatibilidad.</p><textarea id="notifJson">{
-  "tipo": "PRUEBA_FRONT",
-  "pedidoId": 1,
-  "mensaje": "Prueba desde el front integrado"
-}</textarea><div style="height:9px"></div><button class="btn primary" id="sendNotif">POST /notificaciones</button></article><article class="card s6"><h2>Respuesta</h2><div style="height:12px"></div><pre id="notifOut">Sin envíos.</pre></article></div>
+        <div class="hero">
+          <div><h1>Centro de notificaciones</h1><p class="lead">Consulta los mensajes generados por el sistema y envía una notificación de prueba desde una interfaz normal.</p></div>
+          <button class="btn" id="loadNotifs">Actualizar</button>
+        </div>
+        <div class="grid">
+          <article class="card s7">
+            <div class="section-head">
+              <div><h2>Historial</h2><p>Mensajes registrados por compras, pagos y pruebas del sistema.</p></div>
+              <span class="pill" id="notifServiceState">Consultando…</span>
+            </div>
+            <div id="notifList" class="notification-list"><div class="empty-state">Presiona Actualizar para consultar las notificaciones.</div></div>
+          </article>
+          <article class="card s5">
+            <div class="section-head"><div><h2>Enviar notificación</h2><p>Útil para comprobar que el servicio está funcionando.</p></div></div>
+            <form id="notifForm" class="friendly-form">
+              <div class="field">
+                <label>Motivo</label>
+                <select id="notifTipo">
+                  <option value="PRUEBA_FRONT">Prueba del sistema</option>
+                  <option value="PEDIDO_PAGADO">Pedido pagado</option>
+                  <option value="INFORMACION">Información</option>
+                </select>
+              </div>
+              <div class="field"><label>Número de pedido <span class="muted">(opcional)</span></label><input id="notifPedidoId" type="number" min="1" placeholder="Ej. 12"></div>
+              <div class="field"><label>Mensaje</label><textarea id="notifMensaje" placeholder="Escribe el mensaje que deseas registrar..." required>Prueba de notificación desde la Tienda Universitaria</textarea></div>
+              <button class="btn primary" type="submit">Enviar notificación</button>
+            </form>
+            <div id="notifOut" class="checkout-status">Aún no se ha enviado ninguna notificación desde esta pantalla.</div>
+          </article>
+        </div>
       </section>
 
       <section id="config" class="page">
@@ -1496,11 +1669,65 @@
 
   function rows(data) {
     if (Array.isArray(data)) return data;
-    var keys = ["data", "datos", "clientes", "productos", "pedidos", "pagos", "inventario", "items", "resultados"];
+    var keys = ["data", "datos", "clientes", "productos", "pedidos", "pagos", "inventario", "notificaciones", "items", "resultados"];
     for (var i = 0; i < keys.length; i++) {
       if (data && Array.isArray(data[keys[i]])) return data[keys[i]];
     }
     return [];
+  }
+
+  function humanLabel(key) {
+    var map = {
+      id: "ID",
+      cliente_id: "Cliente",
+      clienteId: "Cliente",
+      producto_id: "Producto",
+      productoId: "Producto",
+      cantidad: "Cantidad",
+      precio: "Precio",
+      precio_unitario: "Precio unitario",
+      precioUnitario: "Precio unitario",
+      total: "Total",
+      monto: "Monto",
+      metodo: "Método de pago",
+      metodoPago: "Método de pago",
+      estado: "Estado",
+      correo: "Correo",
+      email: "Correo",
+      nombre: "Nombre",
+      existencia: "Existencia",
+      reservado: "Reservado",
+      creado_en: "Creado",
+      actualizado_en: "Actualizado",
+      createdAt: "Creado",
+      updatedAt: "Actualizado",
+      mensaje: "Mensaje",
+      tipo: "Tipo"
+    };
+    if (map[key]) return map[key];
+
+    return String(key || "")
+      .replace(/_/g, " ")
+      .replace(/([a-z])([A-Z])/g, "$1 $2")
+      .replace(/^./, function (char) { return char.toUpperCase(); });
+  }
+
+  function friendlyValue(key, value) {
+    if (value === null || value === undefined || value === "") return "—";
+    if (typeof value === "boolean") return value ? "Sí" : "No";
+
+    if (["precio", "precio_unitario", "precioUnitario", "total", "monto"].indexOf(key) !== -1) {
+      var amount = Number(value);
+      if (Number.isFinite(amount)) return money(amount);
+    }
+
+    if (/fecha|creado|actualizado|createdAt|updatedAt/i.test(key)) {
+      var date = new Date(value);
+      if (!isNaN(date.getTime())) return date.toLocaleString("es-MX");
+    }
+
+    if (typeof value === "object") return JSON.stringify(value);
+    return String(value);
   }
 
   function renderTable(id, data) {
@@ -1509,15 +1736,17 @@
     var list = rows(data);
 
     if (!list.length) {
-      target.innerHTML = '<div class="empty">No hay registros.</div>';
+      target.innerHTML = '<div class="empty">No hay información para mostrar.</div>';
       return;
     }
 
+    var hiddenKeys = { _id: true, __v: true };
     var seen = {};
     var keys = [];
+
     list.forEach(function (item) {
       Object.keys(item || {}).forEach(function (key) {
-        if (!seen[key] && keys.length < 10) {
+        if (!hiddenKeys[key] && !seen[key] && keys.length < 9) {
           seen[key] = true;
           keys.push(key);
         }
@@ -1526,22 +1755,151 @@
 
     var html = "<table><thead><tr>";
     keys.forEach(function (key) {
-      html += "<th>" + escapeHtml(key) + "</th>";
+      html += "<th>" + escapeHtml(humanLabel(key)) + "</th>";
     });
     html += "</tr></thead><tbody>";
 
     list.forEach(function (item) {
       html += "<tr>";
       keys.forEach(function (key) {
-        var value = item ? item[key] : "";
-        if (value && typeof value === "object") value = JSON.stringify(value);
-        html += "<td>" + escapeHtml(value) + "</td>";
+        html += "<td>" + escapeHtml(friendlyValue(key, item ? item[key] : "")) + "</td>";
       });
       html += "</tr>";
     });
 
     html += "</tbody></table>";
     target.innerHTML = html;
+  }
+
+  function renderLookup(targetId, items, emptyMessage) {
+    var target = el(targetId);
+    if (!target) return;
+
+    var html = '<div class="lookup-grid">';
+    items.forEach(function (item) {
+      html += '<div class="lookup-cell"><small>' + escapeHtml(item.label) + '</small><strong>' +
+        escapeHtml(item.value == null || item.value === "" ? "—" : item.value) +
+        '</strong></div>';
+    });
+    html += '</div>';
+    target.innerHTML = items.length ? html : escapeHtml(emptyMessage || "Sin información.");
+  }
+
+  function renderProductDetail(data) {
+    renderLookup("productoOut", [
+      { label: "Producto", value: productName(data) },
+      { label: "Número", value: data && (data.id != null ? data.id : data.productoId) },
+      { label: "Precio", value: money(productPrice(data)) },
+      { label: "Estado", value: "Disponible en catálogo" }
+    ]);
+  }
+
+  function renderInventoryDetail(data) {
+    var stock = data && (data.existencia != null ? data.existencia : data.stock != null ? data.stock : data.cantidad);
+    var reserved = data && (data.reservado != null ? data.reservado : 0);
+    var productId = data && (data.productoId != null ? data.productoId : data.producto_id != null ? data.producto_id : data.id);
+    var available = Number(stock) - Number(reserved || 0);
+
+    renderLookup("inventarioOut", [
+      { label: "Producto", value: productId },
+      { label: "Existencia", value: stock },
+      { label: "Reservado", value: reserved },
+      { label: "Disponible", value: Number.isFinite(available) ? available : "—" }
+    ]);
+  }
+
+  function renderPedidoResult(data, isError) {
+    var target = el("pedidoOut");
+    if (!target) return;
+
+    if (isError) {
+      target.innerHTML = '<div class="status-card bad"><div class="status-title">No se pudo completar el pedido</div>' +
+        '<div class="status-copy">' + escapeHtml((data && (data.error || data.detalle)) || "Ocurrió un problema durante la operación.") + '</div>' +
+        '<details class="tech-details"><summary>Ver detalles técnicos</summary><pre>' + escapeHtml(JSON.stringify(data, null, 2)) + '</pre></details></div>';
+      return;
+    }
+
+    var pedido = data && data.pedido || {};
+    var integration = data && data.integracion || {};
+    var total = pedido.total != null ? money(pedido.total) : "—";
+
+    target.innerHTML = '<div class="status-card ok"><div class="status-title">Pedido registrado correctamente</div>' +
+      '<div class="status-copy">La operación se procesó y estos son los resultados principales.</div>' +
+      '<div class="status-grid">' +
+        '<div class="status-metric"><small>Pedido</small><strong>#' + escapeHtml(pedido.id || "—") + '</strong></div>' +
+        '<div class="status-metric"><small>Total</small><strong>' + escapeHtml(total) + '</strong></div>' +
+        '<div class="status-metric"><small>Pago</small><strong>' + (integration.pagoRegistrado ? "Registrado" : "Pendiente") + '</strong></div>' +
+        '<div class="status-metric"><small>Notificación</small><strong>' + (integration.notificacionEnviada ? "Enviada" : "No enviada") + '</strong></div>' +
+      '</div>' +
+      '<details class="tech-details"><summary>Ver detalles técnicos</summary><pre>' + escapeHtml(JSON.stringify(data, null, 2)) + '</pre></details></div>';
+  }
+
+  function notificationMessage(item) {
+    return item && (item.mensaje || item.message || item.texto || item.descripcion || item.contenido) || "Notificación registrada";
+  }
+
+  function notificationType(item) {
+    return item && (item.tipo || item.type || item.evento || item.categoria) || "NOTIFICACION";
+  }
+
+  function notificationDate(item) {
+    var raw = item && (item.createdAt || item.creado_en || item.fecha || item.timestamp || item.updatedAt);
+    if (!raw) return "";
+    var date = new Date(raw);
+    return isNaN(date.getTime()) ? String(raw) : date.toLocaleString("es-MX");
+  }
+
+  function renderNotifications(data) {
+    var list = rows(data);
+    var target = el("notifList");
+    var count = el("notifCount");
+    var state = el("notifServiceState");
+
+    if (count) count.textContent = String(list.length);
+    if (state) {
+      state.className = "pill ok";
+      state.textContent = "Servicio disponible";
+    }
+
+    if (!target) return;
+    if (!list.length) {
+      target.innerHTML = '<div class="empty-state">El servicio está disponible, pero todavía no hay notificaciones registradas.</div>';
+      return;
+    }
+
+    target.innerHTML = list.slice().reverse().map(function (item) {
+      var type = notificationType(item);
+      var orderId = item && (item.pedidoId != null ? item.pedidoId : item.pedido_id);
+      return '<article class="notification-item">' +
+        '<div class="notification-icon">' + escapeHtml(String(type).slice(0,2).toUpperCase()) + '</div>' +
+        '<div><div class="notification-title">' + escapeHtml(humanLabel(String(type).toLowerCase())) + '</div>' +
+        '<div class="notification-message">' + escapeHtml(notificationMessage(item)) + '</div>' +
+        '<div class="notification-meta">' + (orderId != null ? "Pedido #" + escapeHtml(orderId) : "Mensaje del sistema") + '</div></div>' +
+        '<div class="notification-time">' + escapeHtml(notificationDate(item)) + '</div>' +
+      '</article>';
+    }).join("");
+  }
+
+  async function loadNotifications() {
+    var state = el("notifServiceState");
+    if (state) {
+      state.className = "pill test";
+      state.textContent = "Consultando…";
+    }
+
+    try {
+      var data = await api("notificaciones", "/notificaciones");
+      renderNotifications(data);
+    } catch (error) {
+      if (state) {
+        state.className = "pill bad";
+        state.textContent = "No disponible";
+      }
+      if (el("notifList")) {
+        el("notifList").innerHTML = '<div class="empty-state">No fue posible consultar el historial. El servicio puede aceptar envíos aunque no tenga habilitada la consulta de mensajes.</div>';
+      }
+      if (el("notifCount")) el("notifCount").textContent = "—";
+    }
   }
 
   var storedConfig = parseJson(localStorage.getItem("tu-microservices-config"), {});
@@ -1629,6 +1987,9 @@
       go(page);
       if (page === "experiencia" && !uxLoaded) {
         loadUserExperience();
+      }
+      if (page === "notificaciones") {
+        loadNotifications();
       }
     });
   });
@@ -1731,11 +2092,16 @@
     }
   });
 
-  bind("createCliente", "click", async function () {
+  bind("clienteForm", "submit", async function (event) {
+    event.preventDefault();
     try {
-      var body = parseJson(el("clienteJson").value, {});
+      var body = {
+        nombre: el("clienteNombre").value.trim(),
+        correo: el("clienteCorreo").value.trim()
+      };
       await api("clientes", "/clientes", { method: "POST", body: JSON.stringify(body) });
-      toast("Cliente enviado");
+      toast("Cliente guardado");
+      event.currentTarget.reset();
       renderTable("clientesTable", await api("clientes", "/clientes"));
     } catch (error) {
       toast(error.message);
@@ -1754,9 +2120,9 @@
     var out = el("productoOut");
     try {
       var id = Number(el("productoBuscarId").value);
-      out.textContent = JSON.stringify(await api("productos", "/productos/" + id), null, 2);
+      renderProductDetail(await api("productos", "/productos/" + id));
     } catch (error) {
-      out.textContent = error.message;
+      out.innerHTML = '<div class="status-card bad"><div class="status-title">Producto no encontrado</div><div class="status-copy">' + escapeHtml(error.message) + '</div></div>';
     }
   });
 
@@ -1785,7 +2151,7 @@
     }
 
     var out = el("pedidoOut");
-    out.textContent = "Ejecutando flujo distribuido…";
+    out.innerHTML = '<div class="status-card"><div class="status-title">Procesando pedido…</div><div class="status-copy">El sistema está coordinando pago, inventario y notificación.</div></div>';
 
     try {
       var data = await api("pedidos", "/pedidos", {
@@ -1793,13 +2159,13 @@
         body: JSON.stringify(body)
       });
 
-      out.textContent = JSON.stringify(data, null, 2);
+      renderPedidoResult(data, false);
       toast("Pedido creado");
       await loadPedidos();
       summary();
       probeAll();
     } catch (error) {
-      out.textContent = JSON.stringify(error.data || { error: error.message }, null, 2);
+      renderPedidoResult(error.data || { error: error.message }, true);
       toast(error.message);
     }
   });
@@ -1835,9 +2201,9 @@
     var out = el("inventarioOut");
     try {
       var id = Number(el("invId").value);
-      out.textContent = JSON.stringify(await api("inventario", "/inventario/" + id), null, 2);
+      renderInventoryDetail(await api("inventario", "/inventario/" + id));
     } catch (error) {
-      out.textContent = error.message;
+      out.innerHTML = '<div class="status-card bad"><div class="status-title">No se pudo consultar</div><div class="status-copy">' + escapeHtml(error.message) + '</div></div>';
     }
   });
 
@@ -1849,25 +2215,41 @@
         method: "PUT",
         body: JSON.stringify({ existencia: existencia, cantidad: existencia })
       });
-      el("inventarioOut").textContent = JSON.stringify(data, null, 2);
-      toast("Inventario actualizado");
+      renderInventoryDetail(data);
+      toast("Existencia actualizada");
     } catch (error) {
       toast(error.message);
     }
   });
 
-  bind("sendNotif", "click", async function () {
+  bind("loadNotifs", "click", loadNotifications);
+
+  bind("notifForm", "submit", async function (event) {
+    event.preventDefault();
     var out = el("notifOut");
+
     try {
-      var body = parseJson(el("notifJson").value, {});
-      out.textContent = JSON.stringify(await api("notificaciones", "/notificaciones", {
+      var pedidoIdValue = el("notifPedidoId").value.trim();
+      var body = {
+        tipo: el("notifTipo").value,
+        mensaje: el("notifMensaje").value.trim()
+      };
+
+      if (pedidoIdValue) body.pedidoId = Number(pedidoIdValue);
+
+      await api("notificaciones", "/notificaciones", {
         method: "POST",
         body: JSON.stringify(body)
-      }), null, 2);
+      });
+
+      out.className = "checkout-status ok";
+      out.textContent = "Notificación enviada correctamente.";
       toast("Notificación enviada");
+      await loadNotifications();
     } catch (error) {
-      out.textContent = error.message;
-      toast(error.message);
+      out.className = "checkout-status bad";
+      out.textContent = "No fue posible enviar la notificación. " + error.message;
+      toast("No se pudo enviar la notificación");
     }
   });
 
@@ -2331,7 +2713,8 @@
         el("uxReceiptOrders").innerHTML =
           '<b style="color:#fff">Pedido confirmado.</b> ' +
           (orderIds.length ? "Folio" + (orderIds.length > 1 ? "s" : "") + ": " + orderIds.join(", ") + ". " : "") +
-          "El pago fue procesado y tu compra quedó registrada.";
+          "El pago fue procesado y tu compra quedó registrada." +
+          (results.every(function (result) { return result && result.integracion && result.integracion.notificacionEnviada; }) ? " También se registró la notificación de confirmación." : " La compra quedó registrada; la notificación puede estar pendiente.");
       }
 
       if (el("uxConfirmation")) el("uxConfirmation").classList.add("show");
