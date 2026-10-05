@@ -136,3 +136,22 @@ El menú **Flujo** permite demostrar en una sola pantalla el recorrido real de u
 Los pasos se marcan visualmente como **completados**, **omitidos** o **fallidos** usando los datos reales devueltos por el microservicio Pedidos.
 
 Para la demostración final, los tres equipos deben estar conectados y las cuatro URLs externas del `.env` del Equipo 2 deben estar configuradas.
+
+
+## Probar experiencia de usuario
+
+El menú **Experiencia de usuario** presenta el sistema como una tienda normal, ocultando rutas, JSON y detalles internos.
+
+La demostración continua es:
+
+1. seleccionar un perfil de cliente;
+2. navegar el catálogo;
+3. agregar productos al carrito;
+4. cambiar cantidades o eliminar productos;
+5. elegir forma de pago;
+6. finalizar la compra;
+7. recibir una confirmación con folio, total y método de pago.
+
+Internamente, el front sigue consumiendo los microservicios reales. Si hay varios productos en el carrito, se generan los pedidos correspondientes de forma secuencial y la interfaz los agrupa como una sola experiencia de compra.
+
+Esta vista está pensada para mostrar el sistema desde la perspectiva de un usuario final; la pestaña **Flujo** queda disponible para explicar después qué microservicios participaron por detrás.
