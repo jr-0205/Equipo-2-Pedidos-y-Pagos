@@ -144,6 +144,72 @@ function inventoryProductId(item) {
   );
 }
 
+function genericRecordId(item) {
+  if (!item || typeof item !== 'object') return null;
+  return firstDefined(
+    item.id,
+    item._id,
+    item.clienteId,
+    item.cliente_id,
+    item.productoId,
+    item.producto_id,
+    item.productId,
+    item.idCliente,
+    item.idProducto
+  );
+}
+
+function findRecordById(payload, id) {
+  if (!payload || typeof payload !== 'object') return null;
+
+  const directId = genericRecordId(payload);
+  if (directId !== null && String(directId) === String(id)) {
+    return payload;
+  }
+
+  const collection = extractCollection(payload);
+  return collection.find((item) =>
+    String(genericRecordId(item)) === String(id)
+  ) || null;
+}
+
+async function getServiceRecord(baseUrl, resourceName, id) {
+  if (!baseUrl) return null;
+
+  // Primero intenta el endpoint REST individual.
+  try {
+    const direct = await requestJson(
+      baseUrl + '/' + resourceName + '/' + encodeURIComponent(id)
+    );
+    const record = findRecordById(direct, id);
+
+    // Algunos servicios regresan directamente el objeto sin envolverlo.
+    if (record) return record;
+    if (direct && typeof direct === 'object' && !Array.isArray(direct)) {
+      return direct;
+    }
+  } catch (error) {
+    // Si el otro equipo no implementó /:id, usar la colección completa.
+    if (error.status && ![404, 405].includes(error.status)) {
+      throw error;
+    }
+  }
+
+  const collectionPayload = await requestJson(baseUrl + '/' + resourceName);
+  const record = findRecordById(collectionPayload, id);
+
+  if (!record) {
+    const error = new Error(
+      resourceName.slice(0, -1) + ' ' + id + ' no encontrado'
+    );
+    error.status = 404;
+    error.data = collectionPayload;
+    throw error;
+  }
+
+  return record;
+}
+
 function findInventoryRecord(payload, productoId) {
   if (!payload || typeof payload !== 'object') return null;
 
@@ -368,12 +434,12 @@ app.post('/pedidos', async (req, res) => {
 
   try {
     if (CLIENTES_URL) {
-      await requestJson(CLIENTES_URL + '/clientes/' + clienteId);
+      await getServiceRecord(CLIENTES_URL, 'clientes', clienteId);
       integracion.clienteConsultado = true;
     }
 
     if (PRODUCTOS_URL) {
-      const producto = await requestJson(PRODUCTOS_URL + '/productos/' + productoId);
+      const producto = await getServiceRecord(PRODUCTOS_URL, 'productos', productoId);
       const precioExterno = extractPrice(producto);
 
       if (precioExterno !== null) {
@@ -555,9 +621,25 @@ app.get('/gateway/clientes', (req, res) =>
   gatewayRequest(res, CLIENTES_URL, 'clientes', '/clientes')
 );
 
-app.get('/gateway/clientes/:id', (req, res) =>
-  gatewayRequest(res, CLIENTES_URL, 'clientes', '/clientes/' + encodeURIComponent(req.params.id))
-);
+app.get('/gateway/clientes/:id', async (req, res) => {
+  if (!CLIENTES_URL) {
+    return res.status(503).json({
+      error: 'Servicio no configurado',
+      servicio: 'clientes',
+      detalle: 'Configura CLIENTES_URL en el archivo .env del Equipo 2.'
+    });
+  }
+
+  try {
+    return res.json(await getServiceRecord(CLIENTES_URL, 'clientes', req.params.id));
+  } catch (error) {
+    return res.status(error.status || 502).json({
+      error: 'No fue posible consultar clientes',
+      detalle: error.message,
+      upstream: error.data || null
+    });
+  }
+});
 
 app.post('/gateway/clientes', (req, res) =>
   gatewayRequest(res, CLIENTES_URL, 'clientes', '/clientes', {
@@ -570,9 +652,25 @@ app.get('/gateway/productos', (req, res) =>
   gatewayRequest(res, PRODUCTOS_URL, 'productos', '/productos')
 );
 
-app.get('/gateway/productos/:id', (req, res) =>
-  gatewayRequest(res, PRODUCTOS_URL, 'productos', '/productos/' + encodeURIComponent(req.params.id))
-);
+app.get('/gateway/productos/:id', async (req, res) => {
+  if (!PRODUCTOS_URL) {
+    return res.status(503).json({
+      error: 'Servicio no configurado',
+      servicio: 'productos',
+      detalle: 'Configura PRODUCTOS_URL en el archivo .env del Equipo 2.'
+    });
+  }
+
+  try {
+    return res.json(await getServiceRecord(PRODUCTOS_URL, 'productos', req.params.id));
+  } catch (error) {
+    return res.status(error.status || 502).json({
+      error: 'No fue posible consultar productos',
+      detalle: error.message,
+      upstream: error.data || null
+    });
+  }
+});
 
 app.get('/gateway/pagos', (req, res) =>
   gatewayRequest(res, PAGOS_URL, 'pagos', '/pagos')
