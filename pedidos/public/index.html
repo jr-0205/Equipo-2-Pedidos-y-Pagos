@@ -1496,7 +1496,7 @@
 
   function rows(data) {
     if (Array.isArray(data)) return data;
-    var keys = ["data", "clientes", "productos", "pedidos", "pagos", "items", "resultados"];
+    var keys = ["data", "datos", "clientes", "productos", "pedidos", "pagos", "inventario", "items", "resultados"];
     for (var i = 0; i < keys.length; i++) {
       if (data && Array.isArray(data[keys[i]])) return data[keys[i]];
     }
@@ -2047,7 +2047,9 @@
       var raw = data && (data.existencia != null ? data.existencia :
         data.stock != null ? data.stock :
         data.cantidad != null ? data.cantidad :
-        data.data && data.data.existencia);
+        data.data && data.data.existencia != null ? data.data.existencia :
+        data.datos && !Array.isArray(data.datos) && data.datos.existencia != null ? data.datos.existencia :
+        null);
       var stock = Number(raw);
       if (Number.isFinite(stock)) {
         return stock > 0 ?
