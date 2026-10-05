@@ -1975,11 +1975,15 @@
     target.innerHTML = list.slice().reverse().map(function (item) {
       var type = notificationType(item);
       var orderId = item && (item.pedidoId != null ? item.pedidoId : item.pedido_id);
+      var origin = item && (item.origen || item.origin || item.servicio);
       return '<article class="notification-item">' +
         '<div class="notification-icon">' + escapeHtml(String(type).slice(0,2).toUpperCase()) + '</div>' +
         '<div><div class="notification-title">' + escapeHtml(humanLabel(String(type).toLowerCase())) + '</div>' +
         '<div class="notification-message">' + escapeHtml(notificationMessage(item)) + '</div>' +
-        '<div class="notification-meta">' + (orderId != null ? "Pedido #" + escapeHtml(orderId) : "Mensaje del sistema") + '</div></div>' +
+        '<div class="notification-meta">' +
+          (origin ? "Origen: " + escapeHtml(origin) + " · " : "") +
+          (orderId != null ? "Pedido #" + escapeHtml(orderId) : "Mensaje del sistema") +
+        '</div></div>' +
         '<div class="notification-time">' + escapeHtml(notificationDate(item)) + '</div>' +
       '</article>';
     }).join("");
@@ -2407,6 +2411,7 @@
     try {
       var pedidoIdValue = el("notifPedidoId").value.trim();
       var body = {
+        origen: "front-admin",
         tipo: el("notifTipo").value,
         mensaje: el("notifMensaje").value.trim()
       };
