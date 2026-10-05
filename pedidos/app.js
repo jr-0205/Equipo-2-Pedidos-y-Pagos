@@ -1,7 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const { pool, initDb } = require('./db');
+
+const RUNNING_IN_DOCKER = fs.existsSync('/.dockerenv');
 
 const app = express();
 const PORT = Number(process.env.PORT || 3003);
@@ -27,6 +30,20 @@ function normalizeServiceBaseUrl(value, serviceName = '') {
   const suffix = '/' + serviceName.toLowerCase();
   if (url.toLowerCase().endsWith(suffix)) {
     url = url.slice(0, -suffix.length).replace(/\/+$/, '');
+  }
+
+  // Dentro de un contenedor, localhost apunta al propio contenedor.
+  // En Docker Desktop para Windows, host.docker.internal apunta al host.
+  if (RUNNING_IN_DOCKER) {
+    try {
+      const parsed = new URL(url);
+      if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') {
+        parsed.hostname = 'host.docker.internal';
+        url = parsed.toString().replace(/\/$/, '');
+      }
+    } catch {
+      // Si no es una URL válida, se conserva para que el error real sea visible.
+    }
   }
 
   return url;
@@ -94,6 +111,93 @@ function firstDefined() {
   return null;
 }
 
+function extractCollection(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (!payload || typeof payload !== 'object') return [];
+
+  const candidates = [
+    payload.data,
+    payload.datos,
+    payload.items,
+    payload.resultados,
+    payload.inventario,
+    payload.productos,
+    payload.clientes,
+    payload.pagos
+  ];
+
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate)) return candidate;
+  }
+
+  return [];
+}
+
+function inventoryProductId(item) {
+  if (!item || typeof item !== 'object') return null;
+  return firstDefined(
+    item.productoId,
+    item.producto_id,
+    item.productId,
+    item.idProducto,
+    item.producto && item.producto.id
+  );
+}
+
+function findInventoryRecord(payload, productoId) {
+  if (!payload || typeof payload !== 'object') return null;
+
+  const directId = inventoryProductId(payload);
+  if (directId !== null && String(directId) === String(productoId)) {
+    return payload;
+  }
+
+  if (
+    payload.existencia !== undefined ||
+    payload.stock !== undefined ||
+    payload.cantidad !== undefined
+  ) {
+    return payload;
+  }
+
+  const collection = extractCollection(payload);
+  return collection.find((item) =>
+    String(inventoryProductId(item)) === String(productoId)
+  ) || null;
+}
+
+async function getInventoryRecord(productoId) {
+  if (!INVENTARIO_URL) return null;
+
+  // Algunos equipos implementaron GET /inventario/:productoId.
+  try {
+    const direct = await requestJson(
+      INVENTARIO_URL + '/inventario/' + encodeURIComponent(productoId)
+    );
+    const record = findInventoryRecord(direct, productoId);
+    if (record) return record;
+  } catch (error) {
+    // 404/405 se resuelven intentando la colección completa.
+    if (error.status && ![404, 405].includes(error.status)) {
+      throw error;
+    }
+  }
+
+  // Otros equipos solo exponen GET /inventario y regresan
+  // { exito, total, datos: [...] }. Se normaliza aquí.
+  const list = await requestJson(INVENTARIO_URL + '/inventario');
+  const record = findInventoryRecord(list, productoId);
+
+  if (!record) {
+    const error = new Error('Producto ' + productoId + ' no encontrado en inventario');
+    error.status = 404;
+    error.data = list;
+    throw error;
+  }
+
+  return record;
+}
+
 function extractPrice(producto) {
   if (!producto || typeof producto !== 'object') return null;
 
@@ -115,6 +219,7 @@ function extractStock(inventario) {
     inventario.stock,
     inventario.cantidad,
     inventario.data && inventario.data.existencia,
+    inventario.datos && !Array.isArray(inventario.datos) && inventario.datos.existencia,
     inventario.inventario && inventario.inventario.existencia,
     inventario.inventario && inventario.inventario.stock
   ));
@@ -285,7 +390,7 @@ app.post('/pedidos', async (req, res) => {
     }
 
     if (INVENTARIO_URL) {
-      const inventario = await requestJson(INVENTARIO_URL + '/inventario/' + productoId);
+      const inventario = await getInventoryRecord(productoId);
       stockActual = extractStock(inventario);
       integracion.inventarioConsultado = true;
 
@@ -420,7 +525,7 @@ app.get('/gateway/status', async (req, res) => {
     probeHttp(CLIENTES_URL ? CLIENTES_URL + '/clientes' : ''),
     probeHttp(PRODUCTOS_URL ? PRODUCTOS_URL + '/productos' : ''),
     probeHttp(PAGOS_URL + '/health'),
-    probeHttp(INVENTARIO_URL ? INVENTARIO_URL + '/inventario/1' : ''),
+    probeHttp(INVENTARIO_URL ? INVENTARIO_URL + '/inventario' : ''),
     probeHttp(NOTIFICACIONES_URL ? NOTIFICACIONES_URL + '/notificaciones' : '')
   ]);
 
@@ -484,14 +589,30 @@ app.post('/gateway/pagos', (req, res) =>
   })
 );
 
-app.get('/gateway/inventario/:productoId', (req, res) =>
-  gatewayRequest(
-    res,
-    INVENTARIO_URL,
-    'inventario',
-    '/inventario/' + encodeURIComponent(req.params.productoId)
-  )
+app.get('/gateway/inventario', (req, res) =>
+  gatewayRequest(res, INVENTARIO_URL, 'inventario', '/inventario')
 );
+
+app.get('/gateway/inventario/:productoId', async (req, res) => {
+  if (!INVENTARIO_URL) {
+    return res.status(503).json({
+      error: 'Servicio no configurado',
+      servicio: 'inventario',
+      detalle: 'Configura INVENTARIO_URL en el archivo .env del Equipo 2.'
+    });
+  }
+
+  try {
+    const record = await getInventoryRecord(req.params.productoId);
+    return res.json(record);
+  } catch (error) {
+    return res.status(error.status || 502).json({
+      error: 'No fue posible consultar inventario',
+      detalle: error.message,
+      upstream: error.data || null
+    });
+  }
+});
 
 app.put('/gateway/inventario/:productoId', (req, res) =>
   gatewayRequest(
