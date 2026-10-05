@@ -1270,6 +1270,7 @@
               <div class="field"><label>Nombre</label><input id="clienteNombre" placeholder="Ej. Ana López" required></div>
               <div class="field"><label>Correo electrónico</label><input id="clienteCorreo" type="email" placeholder="ana@universidad.mx" required></div>
               <button class="btn primary" type="submit">Guardar cliente</button>
+              <div id="clienteFormStatus" class="checkout-status">Completa nombre y correo para agregar un cliente.</div>
             </form>
           </article>
         </div>
@@ -2201,17 +2202,54 @@
 
   bind("clienteForm", "submit", async function (event) {
     event.preventDefault();
+
+    var status = el("clienteFormStatus");
+    var button = event.currentTarget.querySelector('button[type="submit"]');
+
     try {
       var body = {
         nombre: el("clienteNombre").value.trim(),
         correo: el("clienteCorreo").value.trim()
       };
-      await api("clientes", "/clientes", { method: "POST", body: JSON.stringify(body) });
+
+      if (status) {
+        status.className = "checkout-status";
+        status.textContent = "Guardando cliente…";
+      }
+      if (button) {
+        button.disabled = true;
+        button.textContent = "Guardando…";
+      }
+
+      await api("clientes", "/clientes", {
+        method: "POST",
+        body: JSON.stringify(body)
+      });
+
+      if (status) {
+        status.className = "checkout-status ok";
+        status.textContent = "Cliente agregado correctamente.";
+      }
+
       toast("Cliente guardado");
       event.currentTarget.reset();
       renderTable("clientesTable", await api("clientes", "/clientes"));
     } catch (error) {
-      toast(error.message);
+      var detail = error && error.data && (error.data.detalle || error.data.error)
+        ? (error.data.detalle || error.data.error)
+        : error.message;
+
+      if (status) {
+        status.className = "checkout-status bad";
+        status.textContent = "No se pudo agregar el cliente. " + detail;
+      }
+
+      toast("No se pudo guardar el cliente");
+    } finally {
+      if (button) {
+        button.disabled = false;
+        button.textContent = "Guardar cliente";
+      }
     }
   });
 
