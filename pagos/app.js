@@ -67,15 +67,9 @@ async function notifyApprovedPayment(pago) {
     const notificacion = await requestJson(NOTIFICACIONES_URL + '/notificaciones', {
       method: 'POST',
       body: JSON.stringify({
-        tipo: 'PAGO_APROBADO',
-        pedidoId: Number(pago.pedido_id),
-        mensaje:
-          'Pago aprobado para el pedido ' +
-          pago.pedido_id +
-          ' por $' +
-          Number(pago.monto).toFixed(2) +
-          ' mediante ' +
-          pago.metodo_pago
+        origen: 'pagos',
+        mensaje: 'Pago aprobado y compra realizada con exito',
+        tipo: 'SUCCESS'
       })
     });
 
