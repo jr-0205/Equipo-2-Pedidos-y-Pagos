@@ -2209,7 +2209,7 @@
     try {
       var body = {
         nombre: el("clienteNombre").value.trim(),
-        correo: el("clienteCorreo").value.trim()
+        email: el("clienteCorreo").value.trim()
       };
 
       if (status) {
@@ -2235,8 +2235,13 @@
       event.currentTarget.reset();
       renderTable("clientesTable", await api("clientes", "/clientes"));
     } catch (error) {
-      var detail = error && error.data && (error.data.detalle || error.data.error)
-        ? (error.data.detalle || error.data.error)
+      var detail = error && error.data
+        ? (
+            error.data.detalle ||
+            (error.data.upstream && error.data.upstream.mensaje) ||
+            error.data.error ||
+            error.message
+          )
         : error.message;
 
       if (status) {
