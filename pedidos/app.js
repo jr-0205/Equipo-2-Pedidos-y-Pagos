@@ -91,7 +91,7 @@ async function gatewayRequest(res, baseUrl, serviceName, pathSuffix, options = {
   } catch (error) {
     return res.status(error.status || 502).json({
       error: 'No fue posible consultar ' + serviceName,
-      detalle: error.message,
+      detalle: (error.data && error.data.mensaje) || error.message,
       upstream: error.data || null
     });
   }
@@ -218,221 +218,30 @@ async function createClientRecord(input) {
   }
 
   const nombre = String(
-    firstDefined(input && input.nombre, input && input.name, input && input.nombreCompleto) || ''
-  ).trim();
-  const correo = String(
-    firstDefined(
-      input && input.correo,
-      input && input.email,
-      input && input.correoElectronico
-    ) || ''
+    firstDefined(input && input.nombre, input && input.name) || ''
   ).trim();
 
-  if (!nombre) {
-    const error = new Error('El nombre es obligatorio');
+  const email = String(
+    firstDefined(input && input.email, input && input.correo) || ''
+  ).trim();
+
+  if (!nombre || !email) {
+    const error = new Error('Nombre y correo electrónico son requeridos');
     error.status = 400;
     throw error;
   }
 
-  if (!correo) {
-    const error = new Error('El correo es obligatorio');
-    error.status = 400;
-    throw error;
-  }
-
-  let sample = null;
   try {
-    const current = await requestJson(CLIENTES_URL + '/clientes');
-    sample = extractCollection(current)[0] || null;
-  } catch {
-    // La creación puede seguir funcionando aunque la consulta previa falle.
-  }
-
-  const candidates = [];
-
-  function addCandidate(payload) {
-    const signature = JSON.stringify(payload);
-    if (!candidates.some((item) => JSON.stringify(item) === signature)) {
-      candidates.push(payload);
-    }
-  }
-
-  // Prioriza el esquema que ya usa el servicio si podemos inferirlo.
-  if (sample && Object.prototype.hasOwnProperty.call(sample, 'email')) {
-    addCandidate({ nombre, email: correo });
-  }
-  if (sample && Object.prototype.hasOwnProperty.call(sample, 'correo')) {
-    addCandidate({ nombre, correo });
-  }
-  if (sample && Object.prototype.hasOwnProperty.call(sample, 'name')) {
-    addCandidate({ name: nombre, email: correo });
-  }
-
-  // Compatibilidad con los formatos más comunes usados por los equipos.
-  addCandidate({ nombre, correo });
-  addCandidate({ nombre, email: correo });
-  addCandidate({ name: nombre, email: correo });
-  addCandidate({ nombreCompleto: nombre, correoElectronico: correo });
-
-  let lastError = null;
-
-  for (const payload of candidates) {
-    try {
-      return await requestJson(CLIENTES_URL + '/clientes', {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      });
-    } catch (error) {
-      lastError = error;
-
-      // Solo prueba otra estructura si el servidor rechazó los datos.
-      if (![400, 422].includes(error.status)) {
-        throw error;
-      }
-    }
-  }
-
-  throw lastError || new Error('No fue posible crear el cliente');
-}
-
-function findInventoryRecord(payload, productoId) {
-  if (!payload || typeof payload !== 'object') return null;
-
-  const directId = inventoryProductId(payload);
-  if (directId !== null && String(directId) === String(productoId)) {
-    return payload;
-  }
-
-  if (
-    payload.existencia !== undefined ||
-    payload.stock !== undefined ||
-    payload.cantidad !== undefined
-  ) {
-    return payload;
-  }
-
-  const collection = extractCollection(payload);
-  return collection.find((item) =>
-    String(inventoryProductId(item)) === String(productoId)
-  ) || null;
-}
-
-async function getInventoryRecord(productoId) {
-  if (!INVENTARIO_URL) return null;
-
-  // Algunos equipos implementaron GET /inventario/:productoId.
-  try {
-    const direct = await requestJson(
-      INVENTARIO_URL + '/inventario/' + encodeURIComponent(productoId)
-    );
-    const record = findInventoryRecord(direct, productoId);
-    if (record) return record;
-  } catch (error) {
-    // 404/405 se resuelven intentando la colección completa.
-    if (error.status && ![404, 405].includes(error.status)) {
-      throw error;
-    }
-  }
-
-  // Otros equipos solo exponen GET /inventario y regresan
-  // { exito, total, datos: [...] }. Se normaliza aquí.
-  const list = await requestJson(INVENTARIO_URL + '/inventario');
-  const record = findInventoryRecord(list, productoId);
-
-  if (!record) {
-    const error = new Error('Producto ' + productoId + ' no encontrado en inventario');
-    error.status = 404;
-    error.data = list;
-    throw error;
-  }
-
-  return record;
-}
-
-function extractPrice(producto) {
-  if (!producto || typeof producto !== 'object') return null;
-
-  return numberOrNull(firstDefined(
-    producto.precio,
-    producto.precio_unitario,
-    producto.price,
-    producto.data && producto.data.precio,
-    producto.producto && producto.producto.precio,
-    producto.producto && producto.producto.precio_unitario
-  ));
-}
-
-function extractStock(inventario) {
-  if (!inventario || typeof inventario !== 'object') return null;
-
-  return numberOrNull(firstDefined(
-    inventario.existencia,
-    inventario.stock,
-    inventario.cantidad,
-    inventario.data && inventario.data.existencia,
-    inventario.datos && !Array.isArray(inventario.datos) && inventario.datos.existencia,
-    inventario.inventario && inventario.inventario.existencia,
-    inventario.inventario && inventario.inventario.stock
-  ));
-}
-
-async function requestJson(url, options = {}) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-
-  try {
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options.headers || {})
-      },
-      signal: controller.signal
+    return await requestJson(CLIENTES_URL + '/clientes', {
+      method: 'POST',
+      body: JSON.stringify({ nombre, email })
     });
-
-    const raw = await response.text();
-    let data = null;
-
-    if (raw) {
-      try {
-        data = JSON.parse(raw);
-      } catch {
-        data = { raw };
-      }
-    }
-
-    if (!response.ok) {
-      const error = new Error('HTTP ' + response.status + ' al consultar ' + url);
-      error.status = response.status;
-      error.data = data;
-      throw error;
-    }
-
-    return data;
   } catch (error) {
-    if (error.name === 'AbortError') {
-      throw new Error('Tiempo de espera agotado al consultar ' + url);
+    if (error.data && error.data.mensaje) {
+      error.message = error.data.mensaje;
     }
     throw error;
-  } finally {
-    clearTimeout(timeout);
   }
-}
-
-async function setPedidoState(id, estado, pagoId = null) {
-  const result = await pool.query(
-    `
-      UPDATE pedidos
-      SET estado = $2,
-          pago_id = COALESCE($3, pago_id),
-          actualizado_en = NOW()
-      WHERE id = $1
-      RETURNING *
-    `,
-    [id, estado, pagoId]
-  );
-
-  return result.rows[0];
 }
 
 app.get('/health', async (req, res) => {
