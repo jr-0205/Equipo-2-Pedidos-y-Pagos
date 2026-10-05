@@ -4,9 +4,93 @@ const { pool, initDb } = require('./db');
 
 const app = express();
 const PORT = Number(process.env.PORT || 3004);
+const REQUEST_TIMEOUT_MS = Number(process.env.REQUEST_TIMEOUT_MS || 5000);
+const NOTIFICACIONES_URL = String(process.env.NOTIFICACIONES_URL || '').trim().replace(/\/+$/, '');
 
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
+
+async function requestJson(url, options = {}) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options.headers || {})
+      },
+      signal: controller.signal
+    });
+
+    const raw = await response.text();
+    let data = null;
+
+    if (raw) {
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        data = { raw };
+      }
+    }
+
+    if (!response.ok) {
+      const error = new Error('HTTP ' + response.status + ' al consultar ' + url);
+      error.status = response.status;
+      error.data = data;
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error('Tiempo de espera agotado al consultar ' + url);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function notifyApprovedPayment(pago) {
+  if (!NOTIFICACIONES_URL || !pago) {
+    return {
+      notificacionEnviada: false,
+      detalle: !NOTIFICACIONES_URL
+        ? 'Servicio de notificaciones no configurado'
+        : 'Pago no disponible para notificar'
+    };
+  }
+
+  try {
+    const notificacion = await requestJson(NOTIFICACIONES_URL + '/notificaciones', {
+      method: 'POST',
+      body: JSON.stringify({
+        tipo: 'PAGO_APROBADO',
+        pedidoId: Number(pago.pedido_id),
+        pagoId: Number(pago.id),
+        monto: Number(pago.monto),
+        metodo: pago.metodo_pago,
+        mensaje:
+          'Pago aprobado para el pedido ' +
+          pago.pedido_id +
+          ' por $' +
+          Number(pago.monto).toFixed(2)
+      })
+    });
+
+    return {
+      notificacionEnviada: true,
+      notificacion
+    };
+  } catch (error) {
+    return {
+      notificacionEnviada: false,
+      detalle: error.message
+    };
+  }
+}
 
 app.get('/health', async (req, res) => {
   try {
@@ -15,7 +99,10 @@ app.get('/health', async (req, res) => {
       ok: true,
       servicio: 'pagos',
       puerto: PORT,
-      postgres: 'ok'
+      postgres: 'ok',
+      notificaciones: {
+        configurado: Boolean(NOTIFICACIONES_URL)
+      }
     });
   } catch (error) {
     res.status(503).json({ ok: false, servicio: 'pagos', error: error.message });
@@ -110,16 +197,30 @@ app.post('/pagos', async (req, res, next) => {
       [pedidoId, monto.toFixed(2), metodo, referencia]
     );
 
-    if (insert.rows.length) {
-      return res.status(201).json(insert.rows[0]);
+    let pago = insert.rows[0];
+
+    if (!pago) {
+      const existing = await pool.query(
+        'SELECT * FROM pagos WHERE pedido_id = $1',
+        [pedidoId]
+      );
+      pago = existing.rows[0];
     }
 
-    const existing = await pool.query(
-      'SELECT * FROM pagos WHERE pedido_id = $1',
-      [pedidoId]
-    );
+    const resultadoNotificacion = await notifyApprovedPayment(pago);
 
-    res.status(200).json(existing.rows[0]);
+    return res.status(insert.rows.length ? 201 : 200).json({
+      pago,
+      integracion: {
+        notificacionEnviada: resultadoNotificacion.notificacionEnviada
+      },
+      advertenciaNotificacion: resultadoNotificacion.notificacionEnviada
+        ? null
+        : resultadoNotificacion.detalle,
+      notificacion: resultadoNotificacion.notificacionEnviada
+        ? resultadoNotificacion.notificacion
+        : null
+    });
   } catch (error) {
     next(error);
   }
