@@ -25,6 +25,8 @@ services:
     environment:
       PORT: 3004
       DATABASE_URL: postgresql://tienda:tienda123@postgres:5432/pagos_db
+      NOTIFICACIONES_URL: ${NOTIFICACIONES_URL:-}
+      REQUEST_TIMEOUT_MS: ${REQUEST_TIMEOUT_MS:-5000}
     ports:
       - "3004:3004"
     depends_on:
