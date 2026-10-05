@@ -622,6 +622,28 @@
     details.tech-details{margin-top:10px}
     details.tech-details summary{cursor:pointer;color:#777c86;font-size:.67rem}
     details.tech-details pre{margin-top:8px;min-height:120px}
+    .inventory-overview{display:grid;gap:8px}
+    .inventory-product{
+      display:grid;
+      grid-template-columns:minmax(0,1.4fr) repeat(3,minmax(90px,.55fr));
+      gap:10px;
+      align-items:center;
+      padding:12px;
+      border:1px solid var(--line);
+      border-radius:10px;
+      background:#0b0d10;
+    }
+    .inventory-product-name{font-size:.8rem;font-weight:820;color:#eef0f3}
+    .inventory-product-id{margin-top:3px;color:#6e737d;font-size:.64rem}
+    .inventory-stat small{display:block;color:#696f79;font-size:.61rem;margin-bottom:3px}
+    .inventory-stat strong{font-size:.76rem;color:#d9dce1}
+    .inventory-stock-good{color:var(--success)!important}
+    .inventory-stock-low{color:var(--warning)!important}
+    @media(max-width:760px){
+      .inventory-product{grid-template-columns:1fr 1fr}
+      .inventory-product>div:first-child{grid-column:1/-1}
+    }
+
     .notification-list{display:grid;gap:8px}
     .notification-item{
       display:grid;
@@ -1493,17 +1515,28 @@
 
       <section id="inventario" class="page">
         <div class="hero">
-          <div><h1>Inventario</h1><p class="lead">Revisa existencias y actualiza la cantidad disponible sin necesidad de conocer la API.</p></div>
+          <div><h1>Inventario</h1><p class="lead">Existencias vinculadas con el catálogo para reconocer cada producto por nombre y número.</p></div>
+          <button class="btn" id="loadInventario">Actualizar inventario</button>
         </div>
         <div class="grid">
+          <article class="card s12">
+            <div class="section-head">
+              <div><h2>Productos en inventario</h2><p>Se combinan los datos de Productos e Inventario para mostrar una vista entendible.</p></div>
+            </div>
+            <div id="inventarioOverview" class="inventory-overview">
+              <div class="empty-state">Presiona Actualizar inventario para consultar las existencias.</div>
+            </div>
+          </article>
+
           <article class="card s6">
-            <div class="section-head"><div><h2>Consultar existencia</h2><p>Busca un producto para conocer su disponibilidad actual.</p></div></div>
+            <div class="section-head"><div><h2>Consultar producto</h2><p>Busca un producto para conocer su nombre y disponibilidad actual.</p></div></div>
             <div class="field"><label>Número de producto</label><input id="invId" type="number" min="1" value="1"></div>
             <div style="height:9px"></div>
             <button class="btn primary" id="getInventario" style="width:100%">Consultar disponibilidad</button>
             <div style="height:11px"></div>
-            <div class="lookup-result" id="inventarioOut">Aquí aparecerá la existencia del producto.</div>
+            <div class="lookup-result" id="inventarioOut">Aquí aparecerán el nombre y las existencias del producto.</div>
           </article>
+
           <article class="card s6">
             <div class="section-head"><div><h2>Actualizar existencia</h2><p>Define la nueva cantidad disponible para un producto.</p></div></div>
             <div class="friendly-form">
@@ -1511,7 +1544,7 @@
               <div class="field"><label>Nueva existencia</label><input id="invStock" type="number" min="0" value="10"></div>
               <button class="btn" id="updateInventario">Guardar existencia</button>
             </div>
-            <div class="query-help">El sistema se encarga de traducir esta acción al formato que utiliza el microservicio de inventario.</div>
+            <div class="query-help">El nombre del producto se obtiene automáticamente del catálogo.</div>
           </article>
         </div>
       </section>
@@ -1794,18 +1827,89 @@
     ]);
   }
 
-  function renderInventoryDetail(data) {
+  function inventoryProductIdFromRecord(data) {
+    return data && (
+      data.productoId != null ? data.productoId :
+      data.producto_id != null ? data.producto_id :
+      data.productId != null ? data.productId :
+      data.idProducto != null ? data.idProducto :
+      data.id
+    );
+  }
+
+  async function productForInventory(productId) {
+    try {
+      return await api("productos", "/productos/" + encodeURIComponent(productId));
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async function renderInventoryDetail(data) {
     var stock = data && (data.existencia != null ? data.existencia : data.stock != null ? data.stock : data.cantidad);
     var reserved = data && (data.reservado != null ? data.reservado : 0);
-    var productId = data && (data.productoId != null ? data.productoId : data.producto_id != null ? data.producto_id : data.id);
+    var productId = inventoryProductIdFromRecord(data);
     var available = Number(stock) - Number(reserved || 0);
+    var product = productId != null ? await productForInventory(productId) : null;
 
     renderLookup("inventarioOut", [
-      { label: "Producto", value: productId },
+      { label: "Producto", value: product ? productName(product) : "Producto " + (productId == null ? "—" : productId) },
+      { label: "Número de producto", value: productId },
       { label: "Existencia", value: stock },
       { label: "Reservado", value: reserved },
       { label: "Disponible", value: Number.isFinite(available) ? available : "—" }
     ]);
+  }
+
+  async function loadInventoryOverview() {
+    var target = el("inventarioOverview");
+    if (!target) return;
+
+    target.innerHTML = '<div class="empty-state">Consultando productos y existencias…</div>';
+
+    try {
+      var results = await Promise.all([
+        api("inventario", "/inventario"),
+        api("productos", "/productos")
+      ]);
+
+      var inventory = rows(results[0]);
+      var products = rows(results[1]);
+      var productMap = {};
+
+      products.forEach(function (product) {
+        var id = product && (
+          product.id != null ? product.id :
+          product.productoId != null ? product.productoId :
+          product.producto_id
+        );
+        if (id != null) productMap[String(id)] = product;
+      });
+
+      if (!inventory.length) {
+        target.innerHTML = '<div class="empty-state">No hay productos registrados en inventario.</div>';
+        return;
+      }
+
+      target.innerHTML = inventory.map(function (item) {
+        var productId = inventoryProductIdFromRecord(item);
+        var product = productMap[String(productId)] || null;
+        var stock = Number(item.existencia != null ? item.existencia : item.stock != null ? item.stock : item.cantidad);
+        var reserved = Number(item.reservado != null ? item.reservado : 0);
+        var available = stock - reserved;
+        var stockClass = Number.isFinite(available) && available <= 5 ? "inventory-stock-low" : "inventory-stock-good";
+
+        return '<article class="inventory-product">' +
+          '<div><div class="inventory-product-name">' + escapeHtml(product ? productName(product) : "Producto sin nombre") + '</div>' +
+          '<div class="inventory-product-id">ID de producto · ' + escapeHtml(productId == null ? "—" : productId) + '</div></div>' +
+          '<div class="inventory-stat"><small>Existencia</small><strong>' + escapeHtml(Number.isFinite(stock) ? stock : "—") + '</strong></div>' +
+          '<div class="inventory-stat"><small>Reservado</small><strong>' + escapeHtml(Number.isFinite(reserved) ? reserved : "—") + '</strong></div>' +
+          '<div class="inventory-stat"><small>Disponible</small><strong class="' + stockClass + '">' + escapeHtml(Number.isFinite(available) ? available : "—") + '</strong></div>' +
+        '</article>';
+      }).join("");
+    } catch (error) {
+      target.innerHTML = '<div class="empty-state">No fue posible combinar Productos e Inventario. ' + escapeHtml(error.message) + '</div>';
+    }
   }
 
   function renderPedidoResult(data, isError) {
@@ -1990,6 +2094,9 @@
       }
       if (page === "notificaciones") {
         loadNotifications();
+      }
+      if (page === "inventario") {
+        loadInventoryOverview();
       }
     });
   });
@@ -2190,18 +2297,21 @@
           metodo: el("pagoMetodo").value
         })
       });
-      toast("Pago registrado");
+      toast("Pago registrado y notificación solicitada");
       await loadPagos();
+      loadNotifications();
     } catch (error) {
       toast(error.message);
     }
   });
 
+  bind("loadInventario", "click", loadInventoryOverview);
+
   bind("getInventario", "click", async function () {
     var out = el("inventarioOut");
     try {
       var id = Number(el("invId").value);
-      renderInventoryDetail(await api("inventario", "/inventario/" + id));
+      await renderInventoryDetail(await api("inventario", "/inventario/" + id));
     } catch (error) {
       out.innerHTML = '<div class="status-card bad"><div class="status-title">No se pudo consultar</div><div class="status-copy">' + escapeHtml(error.message) + '</div></div>';
     }
@@ -2215,7 +2325,8 @@
         method: "PUT",
         body: JSON.stringify({ existencia: existencia, cantidad: existencia })
       });
-      renderInventoryDetail(data);
+      await renderInventoryDetail(data);
+      await loadInventoryOverview();
       toast("Existencia actualizada");
     } catch (error) {
       toast(error.message);
