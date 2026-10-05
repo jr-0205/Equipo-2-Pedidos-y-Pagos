@@ -725,6 +725,10 @@ app.put('/gateway/inventario/:productoId', (req, res) =>
   )
 );
 
+app.get('/gateway/notificaciones', (req, res) =>
+  gatewayRequest(res, NOTIFICACIONES_URL, 'notificaciones', '/notificaciones')
+);
+
 app.post('/gateway/notificaciones', (req, res) =>
   gatewayRequest(res, NOTIFICACIONES_URL, 'notificaciones', '/notificaciones', {
     method: 'POST',
