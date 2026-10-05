@@ -501,6 +501,11 @@ app.post('/pedidos', async (req, res) => {
         })
       });
       integracion.pagoRegistrado = true;
+      integracion.notificacionEnviada = Boolean(
+        pago &&
+        pago.integracion &&
+        pago.integracion.notificacionEnviada
+      );
     } catch (error) {
       pedido = await setPedidoState(pedido.id, 'PAGO_FALLIDO');
       return res.status(502).json({
@@ -544,23 +549,10 @@ app.post('/pedidos', async (req, res) => {
       }
     }
 
-    let advertenciaNotificacion = null;
-
-    if (NOTIFICACIONES_URL) {
-      try {
-        await requestJson(NOTIFICACIONES_URL + '/notificaciones', {
-          method: 'POST',
-          body: JSON.stringify({
-            tipo: 'PEDIDO_PAGADO',
-            pedidoId: Number(pedido.id),
-            mensaje: 'Pedido ' + pedido.id + ' pagado correctamente'
-          })
-        });
-        integracion.notificacionEnviada = true;
-      } catch (error) {
-        advertenciaNotificacion = error.message;
-      }
-    }
+    const advertenciaNotificacion =
+      pago && pago.advertenciaNotificacion
+        ? pago.advertenciaNotificacion
+        : null;
 
     const finalResult = await pool.query('SELECT * FROM pedidos WHERE id = $1', [pedido.id]);
 
