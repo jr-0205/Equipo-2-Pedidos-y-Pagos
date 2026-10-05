@@ -2203,24 +2203,36 @@
   bind("clienteForm", "submit", async function (event) {
     event.preventDefault();
 
+    // Guardar la referencia antes de cualquier await. En listeners async,
+    // event.currentTarget puede quedar en null después de que el evento continúa.
+    var formElement = event.currentTarget;
     var status = el("clienteFormStatus");
-    var button = event.currentTarget.querySelector('button[type="submit"]');
+    var button = formElement ? formElement.querySelector('button[type="submit"]') : null;
+
+    var body = {
+      nombre: el("clienteNombre").value.trim(),
+      email: el("clienteCorreo").value.trim()
+    };
+
+    if (!body.nombre || !body.email) {
+      if (status) {
+        status.className = "checkout-status bad";
+        status.textContent = "Completa nombre y correo electrónico.";
+      }
+      return;
+    }
+
+    if (status) {
+      status.className = "checkout-status";
+      status.textContent = "Guardando cliente…";
+    }
+
+    if (button) {
+      button.disabled = true;
+      button.textContent = "Guardando…";
+    }
 
     try {
-      var body = {
-        nombre: el("clienteNombre").value.trim(),
-        email: el("clienteCorreo").value.trim()
-      };
-
-      if (status) {
-        status.className = "checkout-status";
-        status.textContent = "Guardando cliente…";
-      }
-      if (button) {
-        button.disabled = true;
-        button.textContent = "Guardando…";
-      }
-
       await api("clientes", "/clientes", {
         method: "POST",
         body: JSON.stringify(body)
@@ -2232,8 +2244,18 @@
       }
 
       toast("Cliente guardado");
-      event.currentTarget.reset();
-      renderTable("clientesTable", await api("clientes", "/clientes"));
+
+      if (formElement && typeof formElement.reset === "function") {
+        formElement.reset();
+      }
+
+      try {
+        renderTable("clientesTable", await api("clientes", "/clientes"));
+      } catch (refreshError) {
+        // El cliente ya fue creado. Un fallo al refrescar la tabla no debe
+        // convertir la operación exitosa en un error de alta.
+        console.warn("Cliente creado, pero no se pudo actualizar la lista:", refreshError);
+      }
     } catch (error) {
       var detail = error && error.data
         ? (
