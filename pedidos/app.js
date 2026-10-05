@@ -210,6 +210,143 @@ async function getServiceRecord(baseUrl, resourceName, id) {
   return record;
 }
 
+
+function findInventoryRecord(payload, productoId) {
+  if (!payload || typeof payload !== 'object') return null;
+
+  const directId = inventoryProductId(payload);
+  if (directId !== null && String(directId) === String(productoId)) {
+    return payload;
+  }
+
+  if (
+    payload.existencia !== undefined ||
+    payload.stock !== undefined ||
+    payload.cantidad !== undefined
+  ) {
+    return payload;
+  }
+
+  const collection = extractCollection(payload);
+  return collection.find((item) =>
+    String(inventoryProductId(item)) === String(productoId)
+  ) || null;
+}
+
+async function getInventoryRecord(productoId) {
+  if (!INVENTARIO_URL) return null;
+
+  try {
+    const direct = await requestJson(
+      INVENTARIO_URL + '/inventario/' + encodeURIComponent(productoId)
+    );
+    const record = findInventoryRecord(direct, productoId);
+    if (record) return record;
+  } catch (error) {
+    if (error.status && ![404, 405].includes(error.status)) {
+      throw error;
+    }
+  }
+
+  const list = await requestJson(INVENTARIO_URL + '/inventario');
+  const record = findInventoryRecord(list, productoId);
+
+  if (!record) {
+    const error = new Error('Producto ' + productoId + ' no encontrado en inventario');
+    error.status = 404;
+    error.data = list;
+    throw error;
+  }
+
+  return record;
+}
+
+function extractPrice(producto) {
+  if (!producto || typeof producto !== 'object') return null;
+
+  return numberOrNull(firstDefined(
+    producto.precio,
+    producto.precio_unitario,
+    producto.price,
+    producto.data && producto.data.precio,
+    producto.producto && producto.producto.precio,
+    producto.producto && producto.producto.precio_unitario
+  ));
+}
+
+function extractStock(inventario) {
+  if (!inventario || typeof inventario !== 'object') return null;
+
+  return numberOrNull(firstDefined(
+    inventario.existencia,
+    inventario.stock,
+    inventario.cantidad,
+    inventario.data && inventario.data.existencia,
+    inventario.datos && !Array.isArray(inventario.datos) && inventario.datos.existencia,
+    inventario.inventario && inventario.inventario.existencia,
+    inventario.inventario && inventario.inventario.stock
+  ));
+}
+
+async function requestJson(url, options = {}) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options.headers || {})
+      },
+      signal: controller.signal
+    });
+
+    const raw = await response.text();
+    let data = null;
+
+    if (raw) {
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        data = { raw };
+      }
+    }
+
+    if (!response.ok) {
+      const error = new Error('HTTP ' + response.status + ' al consultar ' + url);
+      error.status = response.status;
+      error.data = data;
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error('Tiempo de espera agotado al consultar ' + url);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function setPedidoState(id, estado, pagoId = null) {
+  const result = await pool.query(
+    `
+      UPDATE pedidos
+      SET estado = $2,
+          pago_id = COALESCE($3, pago_id),
+          actualizado_en = NOW()
+      WHERE id = $1
+      RETURNING *
+    `,
+    [id, estado, pagoId]
+  );
+
+  return result.rows[0];
+}
+
 async function createClientRecord(input) {
   if (!CLIENTES_URL) {
     const error = new Error('Servicio de clientes no configurado');
