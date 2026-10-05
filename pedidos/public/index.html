@@ -585,6 +585,134 @@
     }
     .toast.show{opacity:1;transform:none}
 
+    .auth-gate{
+      position:fixed;
+      inset:0;
+      z-index:2000;
+      display:grid;
+      place-items:center;
+      padding:24px;
+      background:
+        radial-gradient(circle at 18% 10%, rgba(124,108,246,.12), transparent 32rem),
+        #08090a;
+    }
+    .auth-gate.hidden{display:none}
+    .auth-panel{
+      width:min(920px,100%);
+      display:grid;
+      grid-template-columns:minmax(0,1fr) minmax(300px,.85fr);
+      gap:14px;
+    }
+    .auth-main,.auth-info{
+      border:1px solid var(--line);
+      background:var(--surface);
+      border-radius:14px;
+      padding:24px;
+    }
+    .auth-brand{
+      display:flex;
+      align-items:center;
+      gap:11px;
+      margin-bottom:26px;
+    }
+    .auth-brand .logo{flex:0 0 auto}
+    .auth-eyebrow{
+      color:#70747d;
+      font-size:.68rem;
+      font-weight:800;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+    }
+    .auth-title{
+      margin:7px 0 0;
+      font-size:2rem;
+      letter-spacing:-.045em;
+      line-height:1.05;
+    }
+    .auth-copy{
+      margin:9px 0 22px;
+      color:var(--muted);
+      font-size:.82rem;
+      line-height:1.6;
+    }
+    .auth-form{display:grid;gap:11px}
+    .auth-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:3px}
+    .auth-error{
+      min-height:18px;
+      margin-top:4px;
+      color:var(--danger);
+      font-size:.72rem;
+    }
+    .credential-list{display:grid;gap:10px;margin-top:14px}
+    .credential-card{
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:14px;
+      background:#0b0d10;
+    }
+    .credential-card strong{display:block;font-size:.82rem}
+    .credential-card small{display:block;color:#737781;font-size:.68rem;margin-top:3px;line-height:1.45}
+    .credential-code{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-top:11px;
+      padding-top:10px;
+      border-top:1px solid var(--line);
+      color:#d9dadd;
+      font:11px/1.4 "Cascadia Code",Consolas,monospace;
+    }
+    .role-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:5px 8px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      color:#9da0a8;
+      font-size:.67rem;
+      background:#0d0f12;
+    }
+    .role-chip::before{
+      content:"";
+      width:6px;
+      height:6px;
+      border-radius:50%;
+      background:var(--success);
+    }
+    body.user-mode .app{
+      grid-template-columns:1fr;
+    }
+    body.user-mode .app>aside{
+      display:none;
+    }
+    body.user-mode .topbar{
+      padding-left:max(18px,calc((100vw - var(--content))/2 + 30px));
+      padding-right:max(18px,calc((100vw - var(--content))/2 + 30px));
+    }
+    body.user-mode .topbar .path{
+      color:#d9dadd;
+      font-weight:700;
+    }
+    body.user-mode .topbar .path b{
+      display:none;
+    }
+    body.user-mode #probeAll,
+    body.user-mode [data-go="config"]{
+      display:none;
+    }
+    body.user-mode #uxReload{
+      display:none;
+    }
+    body.user-mode #experiencia .hero{
+      margin-bottom:18px;
+    }
+
+    @media(max-width:900px){
+      .auth-panel{grid-template-columns:1fr}
+    }
+
     @media(max-width:1120px){
       .s8,.s7,.s6,.s5,.s4{grid-column:span 12}
       .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -637,7 +765,55 @@
   </style>
 </head>
 <body>
-<div class="app">
+
+<div class="auth-gate" id="authGate">
+  <div class="auth-panel">
+    <section class="auth-main">
+      <div class="auth-brand">
+        <div class="logo">TU</div>
+        <div>
+          <div class="auth-eyebrow">Acceso de demostración</div>
+          <strong>Tienda Universitaria</strong>
+        </div>
+      </div>
+
+      <h1 class="auth-title">Elige cómo quieres probar el sistema.</h1>
+      <p class="auth-copy">El acceso solo cambia la experiencia del front. No modifica URLs, puertos, variables de entorno ni la comunicación actual entre microservicios.</p>
+
+      <form id="loginForm" class="auth-form">
+        <div class="field">
+          <label>Usuario</label>
+          <input id="loginUser" autocomplete="username" placeholder="admin o usuario" required>
+        </div>
+        <div class="field">
+          <label>Contraseña</label>
+          <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Contraseña" required>
+        </div>
+        <button class="btn primary" type="submit">Entrar</button>
+        <div class="auth-error" id="loginError"></div>
+      </form>
+    </section>
+
+    <aside class="auth-info" style="position:static;height:auto">
+      <div class="auth-eyebrow">Credenciales válidas</div>
+      <div class="credential-list">
+        <div class="credential-card">
+          <strong>Administrador</strong>
+          <small>Panel completo, estados, pedidos, pagos, datos, flujo y conexiones.</small>
+          <div class="credential-code"><span>admin / admin</span><button class="btn small" type="button" data-demo-login="admin">Usar</button></div>
+        </div>
+        <div class="credential-card">
+          <strong>Usuario de tienda</strong>
+          <small>Experiencia normal de compra: catálogo, carrito, pago y confirmación.</small>
+          <div class="credential-code"><span>usuario / usuario</span><button class="btn small" type="button" data-demo-login="user">Usar</button></div>
+        </div>
+      </div>
+      <div class="note" style="margin-top:12px">Estas credenciales son solo para la demostración del front y no sustituyen un sistema real de autenticación.</div>
+    </aside>
+  </div>
+</div>
+
+<div class="app" id="appShell">
   <aside>
     <div class="brand"><div class="logo">TU</div><div><b>Tienda Universitaria</b><small>Microservicios distribuidos</small></div></div>
     <nav class="nav">
@@ -665,7 +841,12 @@
   <main>
     <header class="topbar">
       <div class="path">Tienda Universitaria / <b id="title">Resumen</b></div>
-      <div class="toolbar"><button class="btn small ghost" id="probeAll">Verificar servicios</button><button class="btn small" data-go="config">Conexiones</button></div>
+      <div class="toolbar">
+        <span class="role-chip" id="roleChip">Sin sesión</span>
+        <button class="btn small ghost" id="probeAll">Verificar servicios</button>
+        <button class="btn small" data-go="config">Conexiones</button>
+        <button class="btn small ghost" id="logoutBtn">Cerrar sesión</button>
+      </div>
     </header>
 
     <div class="content">
@@ -713,8 +894,8 @@
         <div class="ux-shell">
           <div>
             <article class="card">
-              <h2>¿Quién está comprando?</h2>
-              <p class="muted" style="font-size:.8rem;margin:7px 0 13px">Selecciona un cliente disponible para continuar.</p>
+              <h2>Tu perfil de compra</h2>
+              <p class="muted" style="font-size:.8rem;margin:7px 0 13px">Para la demostración se usa un cliente real disponible en el microservicio.</p>
               <div class="field">
                 <label>Perfil</label>
                 <select id="uxCliente"><option value="">Cargando clientes…</option></select>
@@ -948,6 +1129,8 @@
     ["inventario", "Inventario", "E3", 3005],
     ["notificaciones", "Notificaciones", "E3", 3006]
   ];
+
+  var currentRole = null;
 
   var names = {
     dashboard: "Resumen",
@@ -1747,6 +1930,12 @@
       uxClients = rows(data[0]);
       uxProducts = rows(data[1]);
       renderUxClients();
+
+      if (currentRole === "user" && uxClients.length && el("uxCliente")) {
+        el("uxCliente").value = String(uxClients[0].id);
+        setUxStep(2);
+      }
+
       await renderUxProducts();
       renderUxCart();
     } catch (error) {
@@ -1934,10 +2123,95 @@
     console.error(event.error || event.message);
   });
 
+  function setRole(role) {
+    currentRole = role;
+    sessionStorage.setItem("tu-demo-role", role);
+
+    document.body.classList.toggle("user-mode", role === "user");
+    document.body.classList.toggle("admin-mode", role === "admin");
+
+    var gate = el("authGate");
+    if (gate) gate.classList.add("hidden");
+
+    var chip = el("roleChip");
+    if (chip) chip.textContent = role === "admin" ? "Administrador" : "Usuario";
+
+    if (role === "user") {
+      go("experiencia");
+      if (!uxLoaded) loadUserExperience();
+    } else {
+      go("dashboard");
+      summary();
+      probeAll();
+    }
+  }
+
+  function clearSession() {
+    currentRole = null;
+    sessionStorage.removeItem("tu-demo-role");
+    document.body.classList.remove("user-mode", "admin-mode");
+
+    var gate = el("authGate");
+    if (gate) gate.classList.remove("hidden");
+
+    var chip = el("roleChip");
+    if (chip) chip.textContent = "Sin sesión";
+
+    uxLoaded = false;
+    uxCart = [];
+    if (el("loginUser")) el("loginUser").value = "";
+    if (el("loginPassword")) el("loginPassword").value = "";
+    if (el("loginError")) el("loginError").textContent = "";
+  }
+
+  function tryLogin(username, password) {
+    var user = String(username || "").trim().toLowerCase();
+    var pass = String(password || "");
+
+    if (user === "admin" && pass === "admin") {
+      setRole("admin");
+      return true;
+    }
+
+    if ((user === "usuario" || user === "cliente") && (pass === "usuario" || pass === "cliente")) {
+      setRole("user");
+      return true;
+    }
+
+    if (el("loginError")) {
+      el("loginError").textContent = "Credenciales no válidas. Usa una de las cuentas de demostración mostradas.";
+    }
+    return false;
+  }
+
+  bind("loginForm", "submit", function (event) {
+    event.preventDefault();
+    tryLogin(el("loginUser").value, el("loginPassword").value);
+  });
+
+  document.querySelectorAll("[data-demo-login]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      var type = button.dataset.demoLogin;
+      if (type === "admin") {
+        el("loginUser").value = "admin";
+        el("loginPassword").value = "admin";
+      } else {
+        el("loginUser").value = "usuario";
+        el("loginPassword").value = "usuario";
+      }
+      el("loginUser").focus();
+    });
+  });
+
+  bind("logoutBtn", "click", clearSession);
+
   renderServices();
   renderConfig();
-  summary();
-  probeAll();
+
+  var savedRole = sessionStorage.getItem("tu-demo-role");
+  if (savedRole === "admin" || savedRole === "user") {
+    setRole(savedRole);
+  }
 })();
 </script>
 
