@@ -370,7 +370,7 @@
   }
 
   function go(id){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));document.getElementById(id).classList.add('active');document.getElementById('title').textContent=names[id]||id;scrollTo({top:0,behavior:'smooth'})}
-  document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{go(b.dataset.page);if(b.dataset.page==='experiencia')uxLoad()});
+  document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{go(b.dataset.page);if(b.dataset.page==='experiencia'&&!uxProducts.length)uxLoad()});
   document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
 
   function renderServices(){
@@ -766,9 +766,9 @@
       document.getElementById('uxReceiptOrders').innerHTML='<b style="color:#fff">Pedido confirmado.</b> '+(orderIds.length?'Folio'+(orderIds.length>1?'s':'')+': '+orderIds.join(', ')+'. ':'')+'El pago fue procesado y tu compra quedó registrada.';
       document.getElementById('uxConfirmation').classList.add('show');
       status.className='checkout-status ok';status.textContent='Compra completada correctamente.';
-      uxSetStep(5);
       uxCart=[];
       uxRenderCart();
+      uxSetStep(5);
       document.getElementById('uxConfirmation').scrollIntoView({behavior:'smooth',block:'center'});
       toast('Compra completada');
       summary();probeAll();
