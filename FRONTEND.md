@@ -63,8 +63,11 @@ También se normalizan URLs que accidentalmente terminen con el nombre del servi
 | GET | `/gateway/clientes` | `GET /clientes` |
 | GET | `/gateway/clientes/:id` | `GET /clientes/:id` |
 | POST | `/gateway/clientes` | `POST /clientes` |
+| PUT/PATCH/DELETE | `/gateway/clientes/:id` | actualiza o elimina un cliente |
 | GET | `/gateway/productos` | `GET /productos` |
 | GET | `/gateway/productos/:id` | `GET /productos/:id` |
+| POST | `/gateway/productos` | `POST /productos` |
+| PUT/PATCH/DELETE | `/gateway/productos/:id` | actualiza o elimina un producto |
 | GET | `/gateway/pagos` | `GET /pagos` |
 | POST | `/gateway/pagos` | `POST /pagos` |
 | GET | `/gateway/inventario/:productoId` | consulta existencia |
@@ -77,8 +80,8 @@ El panel incluye:
 
 - detección de estado de los seis servicios;
 - conteo de clientes, productos, pedidos y pagos;
-- consulta y alta de clientes;
-- catálogo de productos;
+- consulta, alta, búsqueda, edición y eliminación de clientes;
+- catálogo de productos con alta, búsqueda, edición y eliminación;
 - creación y listado de pedidos;
 - consulta y registro de pagos;
 - consulta y actualización de inventario;
@@ -176,3 +179,12 @@ NOTIFICACIONES_URL=http://192.200.5.142:3006
 ```
 
 Pagos envía la notificación después de confirmar el pago.
+
+
+## Gestión de catálogo desde el panel
+
+En **Productos** se puede agregar un producto con nombre y precio, buscar en el catálogo y usar las acciones de cada fila para editarlo o eliminarlo. En **Clientes** también se puede buscar, editar y eliminar, además de registrar nuevos clientes.
+
+Estas operaciones pasan por el gateway del Equipo 2 y se reenvían al microservicio correspondiente del Equipo 1. Para que crear/editar/eliminar funcione, las APIs externas deben implementar `POST /productos`, `PUT /productos/:id` o `PATCH /productos/:id`, `DELETE /productos/:id` y las rutas equivalentes de clientes. Si el servicio externo no implementa una operación, el panel mostrará el error que devuelva la API; el gateway no guarda un catálogo duplicado localmente.
+
+El Equipo 2 conserva el alcance de la práctica: pedidos se crean/consultan y pagos se registran/consultan; no se habilita la edición o eliminación de transacciones financieras desde el navegador.
