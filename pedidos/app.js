@@ -347,6 +347,29 @@ async function setPedidoState(id, estado, pagoId = null) {
   return result.rows[0];
 }
 
+async function gatewayMutation(res, baseUrl, serviceName, pathSuffix, method, body) {
+  if (!baseUrl) {
+    return res.status(503).json({
+      error: 'Servicio no configurado',
+      servicio: serviceName,
+      detalle: 'Configura ' + serviceName.toUpperCase() + '_URL en el archivo .env del Equipo 2.'
+    });
+  }
+  try {
+    const data = await requestJson(baseUrl + pathSuffix, {
+      method,
+      ...(body === undefined ? {} : { body: JSON.stringify(body) })
+    });
+    return res.status(method === 'POST' ? 201 : 200).json(data);
+  } catch (error) {
+    return res.status(error.status || 502).json({
+      error: 'No fue posible modificar ' + serviceName,
+      detalle: (error.data && (error.data.mensaje || error.data.error)) || error.message,
+      upstream: error.data || null
+    });
+  }
+}
+
 async function createClientRecord(input) {
   if (!CLIENTES_URL) {
     const error = new Error('Servicio de clientes no configurado');
@@ -380,6 +403,37 @@ async function createClientRecord(input) {
     throw error;
   }
 }
+async function createProductRecord(input) {
+  if (!PRODUCTOS_URL) {
+    const error = new Error('Servicio de productos no configurado');
+    error.status = 503;
+    throw error;
+  }
+  const nombre = String(firstDefined(input && input.nombre, input && input.name) || '').trim();
+  const precio = numberOrNull(firstDefined(input && input.precio, input && input.price));
+  if (!nombre) {
+    const error = new Error('El nombre del producto es requerido');
+    error.status = 400;
+    throw error;
+  }
+  if (precio === null || precio < 0) {
+    const error = new Error('El precio debe ser un número mayor o igual a cero');
+    error.status = 400;
+    throw error;
+  }
+  try {
+    return await requestJson(PRODUCTOS_URL + '/productos', {
+      method: 'POST',
+      body: JSON.stringify({ nombre, precio })
+    });
+  } catch (error) {
+    if (error.data && (error.data.mensaje || error.data.error)) {
+      error.message = error.data.mensaje || error.data.error;
+    }
+    throw error;
+  }
+}
+
 
 app.get('/health', async (req, res) => {
   try {
@@ -677,6 +731,17 @@ app.post('/gateway/clientes', async (req, res) => {
   }
 });
 
+
+app.put('/gateway/clientes/:id', (req, res) =>
+  gatewayMutation(res, CLIENTES_URL, 'clientes', '/clientes/' + encodeURIComponent(req.params.id), 'PUT', req.body)
+);
+app.patch('/gateway/clientes/:id', (req, res) =>
+  gatewayMutation(res, CLIENTES_URL, 'clientes', '/clientes/' + encodeURIComponent(req.params.id), 'PATCH', req.body)
+);
+app.delete('/gateway/clientes/:id', (req, res) =>
+  gatewayMutation(res, CLIENTES_URL, 'clientes', '/clientes/' + encodeURIComponent(req.params.id), 'DELETE')
+);
+
 app.get('/gateway/productos', (req, res) =>
   gatewayRequest(res, PRODUCTOS_URL, 'productos', '/productos')
 );
@@ -700,6 +765,29 @@ app.get('/gateway/productos/:id', async (req, res) => {
     });
   }
 });
+
+
+app.post('/gateway/productos', async (req, res) => {
+  try {
+    const producto = await createProductRecord(req.body);
+    return res.status(201).json(producto);
+  } catch (error) {
+    return res.status(error.status || 502).json({
+      error: 'No fue posible agregar el producto',
+      detalle: error.message,
+      upstream: error.data || null
+    });
+  }
+});
+app.put('/gateway/productos/:id', (req, res) =>
+  gatewayMutation(res, PRODUCTOS_URL, 'productos', '/productos/' + encodeURIComponent(req.params.id), 'PUT', req.body)
+);
+app.patch('/gateway/productos/:id', (req, res) =>
+  gatewayMutation(res, PRODUCTOS_URL, 'productos', '/productos/' + encodeURIComponent(req.params.id), 'PATCH', req.body)
+);
+app.delete('/gateway/productos/:id', (req, res) =>
+  gatewayMutation(res, PRODUCTOS_URL, 'productos', '/productos/' + encodeURIComponent(req.params.id), 'DELETE')
+);
 
 app.get('/gateway/pagos', (req, res) =>
   gatewayRequest(res, PAGOS_URL, 'pagos', '/pagos')
