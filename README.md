@@ -36,7 +36,7 @@ El panel incluye:
 - consola HTTP;
 - visualización del flujo de integración de un pedido.
 
-La configuración detallada está en [FRONTEND.md](./FRONTEND.md).
+La configuración detallada está en [FRONTEND.md](./FRONTEND.md). Las operaciones de edición/eliminación se reenvían a las APIs externas del Equipo 1, por lo que esos servicios deben implementar los métodos correspondientes.
 
 ## Estructura
 
