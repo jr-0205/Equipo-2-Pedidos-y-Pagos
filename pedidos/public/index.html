@@ -1143,7 +1143,8 @@
       .receipt-grid{grid-template-columns:1fr}
       .kpis{grid-template-columns:1fr 1fr}
     }
-  </style>
+  .table-actions{display:flex;gap:6px;flex-wrap:wrap;min-width:130px}.table-actions .btn{padding:6px 9px;font-size:.72rem}.table-actions .btn.danger{background:#fff0f0;color:#b42318;border:1px solid #ffd5d2}.table-actions .btn.danger:hover{background:#ffe2df}.field input[type="search"]{width:100%}
+</style>
 </head>
 <body>
 
@@ -2394,7 +2395,7 @@
       var email = window.prompt("Correo electrónico:", button.dataset.email || "");
       if (email === null) return;
       email = email.trim();
-      if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) { toast("Escribe un correo electrónico válido"); return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast("Escribe un correo electrónico válido"); return; }
       body = { nombre: updatedName, email: email };
     }
     try {
