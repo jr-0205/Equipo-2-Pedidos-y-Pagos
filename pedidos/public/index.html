@@ -1256,19 +1256,21 @@
 
       <section id="clientes" class="page">
         <div class="hero">
-          <div><h1>Clientes</h1><p class="lead">Consulta las personas registradas y agrega nuevos clientes sin usar formatos técnicos.</p></div>
+          <div><h1>Clientes</h1><p class="lead">Registra, busca, edita y elimina clientes conectados al servicio del Equipo 1.</p></div>
           <button class="btn" id="loadClientes">Actualizar</button>
         </div>
         <div class="grid">
           <article class="card s8">
-            <div class="section-head"><div><h2>Directorio de clientes</h2><p>Información obtenida del servicio de clientes.</p></div></div>
+            <div class="section-head"><div><h2>Directorio de clientes</h2><p>Usa las acciones de cada fila para administrar los registros.</p></div></div>
+            <div class="field"><label>Buscar cliente</label><input id="searchClientes" type="search" placeholder="Nombre, correo o ID"></div>
+            <div style="height:12px"></div>
             <div id="clientesTable" class="table"><div class="empty">Presiona Actualizar para consultar los clientes.</div></div>
           </article>
           <article class="card s4">
             <div class="section-head"><div><h2>Agregar cliente</h2><p>Captura los datos básicos del nuevo cliente.</p></div></div>
             <form id="clienteForm" class="friendly-form">
-              <div class="field"><label>Nombre</label><input id="clienteNombre" placeholder="Ej. Ana López" required></div>
-              <div class="field"><label>Correo electrónico</label><input id="clienteCorreo" type="email" placeholder="ana@universidad.mx" required></div>
+              <div class="field"><label>Nombre</label><input id="clienteNombre" placeholder="Ej. Ana López" required maxlength="120"></div>
+              <div class="field"><label>Correo electrónico</label><input id="clienteCorreo" type="email" placeholder="ana@universidad.mx" required maxlength="180"></div>
               <button class="btn primary" type="submit">Guardar cliente</button>
               <div id="clienteFormStatus" class="checkout-status">Completa nombre y correo para agregar un cliente.</div>
             </form>
@@ -1278,19 +1280,29 @@
 
       <section id="productos" class="page">
         <div class="hero">
-          <div><h1>Productos</h1><p class="lead">Consulta el catálogo y revisa la información de un producto de forma sencilla.</p></div>
+          <div><h1>Productos</h1><p class="lead">Administra el catálogo desde el panel: agrega, busca, edita y elimina productos.</p></div>
           <button class="btn" id="loadProductos">Actualizar catálogo</button>
         </div>
         <div class="grid">
           <article class="card s8">
             <div class="section-head"><div><h2>Catálogo</h2><p>Productos disponibles en el servicio del Equipo 1.</p></div></div>
+            <div class="field"><label>Buscar producto</label><input id="searchProductos" type="search" placeholder="Nombre, ID o precio"></div>
+            <div style="height:12px"></div>
             <div id="productosTable" class="table"><div class="empty">Presiona Actualizar catálogo para consultar los productos.</div></div>
           </article>
           <article class="card s4">
-            <div class="section-head"><div><h2>Consultar producto</h2><p>Escribe el número del producto que quieres revisar.</p></div></div>
+            <div class="section-head"><div><h2>Agregar producto</h2><p>Captura el nombre y el precio del nuevo producto.</p></div></div>
+            <form id="productoForm" class="friendly-form">
+              <div class="field"><label>Nombre del producto</label><input id="productoNombre" placeholder="Ej. Audífonos inalámbricos" required maxlength="160"></div>
+              <div class="field"><label>Precio (MXN)</label><input id="productoPrecio" type="number" min="0" step="0.01" placeholder="0.00" required></div>
+              <button class="btn primary" type="submit">Guardar producto</button>
+              <div id="productoFormStatus" class="checkout-status">El producto se enviará al servicio de Productos del Equipo 1.</div>
+            </form>
+            <hr style="border:0;border-top:1px solid var(--line);margin:22px 0">
+            <div class="section-head"><div><h2>Consultar producto</h2><p>Busca por ID para ver sus detalles.</p></div></div>
             <div class="field"><label>Número de producto</label><input id="productoBuscarId" type="number" min="1" value="1"></div>
             <div style="height:9px"></div>
-            <button class="btn primary" id="getProducto" style="width:100%">Buscar producto</button>
+            <button class="btn" id="getProducto" style="width:100%">Buscar producto</button>
             <div style="height:11px"></div>
             <div class="lookup-result" id="productoOut">Aquí aparecerá la información del producto.</div>
           </article>
@@ -1768,16 +1780,25 @@
     var target = el(id);
     if (!target) return;
     var list = rows(data);
+    var searchId = id === "productosTable" ? "searchProductos" : (id === "clientesTable" ? "searchClientes" : "");
+    var term = searchId && el(searchId) ? el(searchId).value.trim().toLowerCase() : "";
+    if (term) {
+      list = list.filter(function (item) {
+        return Object.keys(item || {}).some(function (key) {
+          return String(item[key] == null ? "" : item[key]).toLowerCase().indexOf(term) !== -1;
+        });
+      });
+    }
 
     if (!list.length) {
-      target.innerHTML = '<div class="empty">No hay información para mostrar.</div>';
+      target.innerHTML = '<div class="empty">' + (term ? 'No hay resultados para esa búsqueda.' : 'No hay información para mostrar.') + '</div>';
       return;
     }
 
+    var manageable = id === "productosTable" || id === "clientesTable";
     var hiddenKeys = { _id: true, __v: true };
     var seen = {};
     var keys = [];
-
     list.forEach(function (item) {
       Object.keys(item || {}).forEach(function (key) {
         if (!hiddenKeys[key] && !seen[key] && keys.length < 9) {
@@ -1788,9 +1809,8 @@
     });
 
     var html = "<table><thead><tr>";
-    keys.forEach(function (key) {
-      html += "<th>" + escapeHtml(humanLabel(key)) + "</th>";
-    });
+    keys.forEach(function (key) { html += "<th>" + escapeHtml(humanLabel(key)) + "</th>"; });
+    if (manageable) html += "<th>Acciones</th>";
     html += "</tr></thead><tbody>";
 
     list.forEach(function (item) {
@@ -1798,9 +1818,18 @@
       keys.forEach(function (key) {
         html += "<td>" + escapeHtml(friendlyValue(key, item ? item[key] : "")) + "</td>";
       });
+      if (manageable) {
+        var itemId = item && (item.id != null ? item.id : (item._id != null ? item._id : (id === "productosTable" ? item.productoId : item.clienteId)));
+        var name = item && (item.nombre || item.name || "");
+        var price = item && (item.precio != null ? item.precio : (item.price != null ? item.price : ""));
+        var email = item && (item.email || item.correo || "");
+        html += '<td><div class="table-actions">' +
+          '<button type="button" class="btn small" data-manage="' + (id === "productosTable" ? "edit-product" : "edit-client") + '" data-id="' + escapeHtml(itemId == null ? "" : itemId) + '" data-name="' + escapeHtml(name) + '" data-price="' + escapeHtml(price) + '" data-email="' + escapeHtml(email) + '">Editar</button>' +
+          '<button type="button" class="btn small danger" data-manage="' + (id === "productosTable" ? "delete-product" : "delete-client") + '" data-id="' + escapeHtml(itemId == null ? "" : itemId) + '" data-name="' + escapeHtml(name) + '">Eliminar</button>' +
+          '</div></td>';
+      }
       html += "</tr>";
     });
-
     html += "</tbody></table>";
     target.innerHTML = html;
   }
@@ -2282,6 +2311,114 @@
         button.textContent = "Guardar cliente";
       }
     }
+  });
+
+  bind("productoForm", "submit", async function (event) {
+    event.preventDefault();
+    var form = event.currentTarget;
+    var status = el("productoFormStatus");
+    var button = form.querySelector('button[type="submit"]');
+    var nombre = el("productoNombre").value.trim();
+    var precio = Number(el("productoPrecio").value);
+    if (!nombre || !Number.isFinite(precio) || precio < 0) {
+      status.className = "checkout-status bad";
+      status.textContent = "Escribe un nombre y un precio válido mayor o igual a cero.";
+      return;
+    }
+    button.disabled = true;
+    button.textContent = "Guardando…";
+    status.className = "checkout-status";
+    status.textContent = "Guardando producto en el servicio del Equipo 1…";
+    try {
+      await api("productos", "/productos", { method: "POST", body: JSON.stringify({ nombre: nombre, precio: precio }) });
+      form.reset();
+      status.className = "checkout-status ok";
+      status.textContent = "Producto agregado correctamente.";
+      toast("Producto guardado");
+      renderTable("productosTable", await api("productos", "/productos"));
+      summary();
+    } catch (error) {
+      var detail = error && error.data ? (error.data.detalle || error.data.error || error.message) : error.message;
+      status.className = "checkout-status bad";
+      status.textContent = "No se pudo agregar el producto. " + detail;
+      toast("No se pudo guardar el producto");
+    } finally {
+      button.disabled = false;
+      button.textContent = "Guardar producto";
+    }
+  });
+
+  async function refreshManagedTable(type) {
+    var key = type === "product" ? "productos" : "clientes";
+    var path = type === "product" ? "/productos" : "/clientes";
+    renderTable(type === "product" ? "productosTable" : "clientesTable", await api(key, path));
+  }
+
+  async function manageCatalogAction(button) {
+    var action = button.dataset.manage;
+    var id = button.dataset.id;
+    var name = button.dataset.name || "";
+    if (!id) {
+      toast("No se encontró el ID del registro");
+      return;
+    }
+    var product = action.indexOf("product") !== -1;
+    var type = product ? "product" : "client";
+    var key = product ? "productos" : "clientes";
+    var resource = product ? "/productos/" : "/clientes/";
+    if (action.indexOf("delete-") === 0) {
+      if (!window.confirm("¿Eliminar " + name + " (ID " + id + ")? Esta acción no se puede deshacer.")) return;
+      try {
+        await api(key, resource + encodeURIComponent(id), { method: "DELETE" });
+        toast(product ? "Producto eliminado" : "Cliente eliminado");
+        await refreshManagedTable(type);
+        summary();
+      } catch (error) {
+        toast("No se pudo eliminar: " + error.message);
+      }
+      return;
+    }
+
+    var updatedName = window.prompt(product ? "Nombre del producto:" : "Nombre del cliente:", name);
+    if (updatedName === null) return;
+    updatedName = updatedName.trim();
+    if (!updatedName) { toast("El nombre no puede estar vacío"); return; }
+    var body;
+    if (product) {
+      var rawPrice = window.prompt("Precio del producto (MXN):", button.dataset.price || "0");
+      if (rawPrice === null) return;
+      var price = Number(rawPrice);
+      if (!Number.isFinite(price) || price < 0) { toast("Escribe un precio válido mayor o igual a cero"); return; }
+      body = { nombre: updatedName, precio: price };
+    } else {
+      var email = window.prompt("Correo electrónico:", button.dataset.email || "");
+      if (email === null) return;
+      email = email.trim();
+      if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) { toast("Escribe un correo electrónico válido"); return; }
+      body = { nombre: updatedName, email: email };
+    }
+    try {
+      await api(key, resource + encodeURIComponent(id), { method: "PUT", body: JSON.stringify(body) });
+      toast(product ? "Producto actualizado" : "Cliente actualizado");
+      await refreshManagedTable(type);
+      summary();
+    } catch (error) {
+      toast("No se pudo editar: " + error.message);
+    }
+  }
+
+  ["productosTable", "clientesTable"].forEach(function (tableId) {
+    bind(tableId, "click", function (event) {
+      var button = event.target.closest("[data-manage]");
+      if (button) manageCatalogAction(button);
+    });
+  });
+
+  bind("searchProductos", "input", async function () {
+    try { renderTable("productosTable", await api("productos", "/productos")); } catch (error) { toast(error.message); }
+  });
+  bind("searchClientes", "input", async function () {
+    try { renderTable("clientesTable", await api("clientes", "/clientes")); } catch (error) { toast(error.message); }
   });
 
   bind("loadProductos", "click", async function () {
