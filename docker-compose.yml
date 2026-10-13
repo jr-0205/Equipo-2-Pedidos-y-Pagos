@@ -3,8 +3,8 @@ services:
     image: postgres:16-alpine
     container_name: equipo2-postgres
     environment:
-      POSTGRES_USER: tienda
-      POSTGRES_PASSWORD: tienda123
+      POSTGRES_USER: ${POSTGRES_USER:-tienda}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tienda123}
       POSTGRES_DB: postgres
     ports:
       - "${POSTGRES_HOST_PORT:-5433}:5432"
@@ -12,7 +12,7 @@ services:
       - equipo2_postgres_data:/var/lib/postgresql/data
       - ./BD/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U tienda -d pedidos_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-tienda} -d pedidos_db"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -24,11 +24,11 @@ services:
     container_name: equipo2-pagos
     environment:
       PORT: 3004
-      DATABASE_URL: postgresql://tienda:tienda123@postgres:5432/pagos_db
-      NOTIFICACIONES_URL: ${NOTIFICACIONES_URL:-http://192.168.1.176:2507}
+      DATABASE_URL: ${PAGOS_DATABASE_URL:-postgresql://tienda:tienda123@postgres:5432/pagos_db}
+      NOTIFICACIONES_URL: ${NOTIFICACIONES_URL:-}
       REQUEST_TIMEOUT_MS: ${REQUEST_TIMEOUT_MS:-10000}
     ports:
-      - "2504:3004"
+      - "${PAGOS_PORT:-2504}:3004"
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3004/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
       interval: 10s
@@ -46,17 +46,15 @@ services:
     container_name: equipo2-pedidos
     environment:
       PORT: 3003
-      DATABASE_URL: postgresql://tienda:tienda123@postgres:5432/pedidos_db
+      DATABASE_URL: ${PEDIDOS_DATABASE_URL:-postgresql://tienda:tienda123@postgres:5432/pedidos_db}
       PAGOS_URL: http://pagos:3004
-      CLIENTES_URL: ${CLIENTES_URL:-http://192.168.1.251:2501}
-      PRODUCTOS_URL: ${PRODUCTOS_URL:-http://192.168.1.251:2502}
-      INVENTARIO_URL: ${INVENTARIO_URL:-http://192.168.1.176:2506}
-      NOTIFICACIONES_URL: ${NOTIFICACIONES_URL:-http://192.168.1.176:2507}
+      CLIENTES_URL: ${CLIENTES_URL:-}
+      PRODUCTOS_URL: ${PRODUCTOS_URL:-}
+      INVENTARIO_URL: ${INVENTARIO_URL:-}
+      NOTIFICACIONES_URL: ${NOTIFICACIONES_URL:-}
       REQUEST_TIMEOUT_MS: ${REQUEST_TIMEOUT_MS:-10000}
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     ports:
-      - "2503:3003"
+      - "${PEDIDOS_PORT:-2503}:3003"
     depends_on:
       postgres:
         condition: service_healthy
