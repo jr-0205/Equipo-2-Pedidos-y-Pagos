@@ -617,10 +617,34 @@ app.post('/pedidos', async (req, res) => {
       }
     }
 
-    const advertenciaNotificacion =
+    // Registrar notificación de venta después de que el pago fue aprobado
+    // y las existencias se actualizaron correctamente.
+    let advertenciaNotificacion =
       pago && pago.advertenciaNotificacion
         ? pago.advertenciaNotificacion
         : null;
+
+    if (NOTIFICACIONES_URL) {
+      try {
+        const nombreProducto = inventarioActual && inventarioActual.nombre
+          ? inventarioActual.nombre
+          : 'Producto ' + productoId;
+        await requestJson(NOTIFICACIONES_URL + '/api/notifications', {
+          method: 'POST',
+          body: JSON.stringify({
+            servicio: 'ventas',
+            mensaje: `Venta confirmada: pedido #${pedido.id}, ${cantidad} x ${nombreProducto}, total ${total.toFixed(2)}`,
+            tipo: 'success'
+          })
+        });
+        integracion.notificacionEnviada = true;
+      } catch (error) {
+        advertenciaNotificacion = 'La venta se completó, pero no se pudo registrar la notificación: ' + error.message;
+        console.error(advertenciaNotificacion);
+      }
+    } else {
+      advertenciaNotificacion = 'La venta se completó, pero NOTIFICACIONES_URL no está configurada.';
+    }
 
     const finalResult = await pool.query('SELECT * FROM pedidos WHERE id = $1', [pedido.id]);
 
