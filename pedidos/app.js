@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const fs = require('fs');
 const { pool, initDb } = require('./db');
 
@@ -18,7 +17,6 @@ const NOTIFICACIONES_URL = normalizeServiceBaseUrl(process.env.NOTIFICACIONES_UR
 
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
-app.use(express.static(path.join(__dirname, 'public')));
 
 function normalizeServiceBaseUrl(value, serviceName = '') {
   let url = String(value || '').trim().replace(/\/+$/, '');
@@ -272,7 +270,7 @@ function extractStock(inventario) {
   if (!inventario || typeof inventario !== 'object') return null;
 
   return numberOrNull(firstDefined(
-    inventario.quantity
+    inventario.stock
   ));
 }
 
@@ -600,10 +598,10 @@ app.post('/pedidos', async (req, res) => {
         await requestJson(INVENTARIO_URL + '/api/products/' + productoId, {
           method: 'PUT',
           body: JSON.stringify({
-            name: inventarioActual.name,
-            description: inventarioActual.description || '',
-            quantity: nuevaExistencia,
-            price: Number(inventarioActual.price || 0)
+            nombre: inventarioActual.nombre,
+            descripcion: inventarioActual.descripcion || '',
+            stock: nuevaExistencia,
+            precio: Number(inventarioActual.precio || 0)
           })
         });
         integracion.inventarioActualizado = true;
@@ -645,8 +643,7 @@ app.post('/pedidos', async (req, res) => {
 
 /*
  * Gateway del Equipo 2.
- * El front se sirve desde :3003 y consume los otros equipos a través
- * de estas rutas para evitar problemas de CORS en el navegador.
+ * Estas rutas permiten consultar servicios externos desde la API de Pedidos.
  */
 app.get('/gateway/status', async (req, res) => {
   const [clientes, productos, pagos, inventario, notificaciones] = await Promise.all([
@@ -849,9 +846,7 @@ app.put('/gateway/inventario/:productoId', async (req, res) => {
   try {
     const current = await getInventoryRecord(req.params.productoId);
     const quantity = Number(firstDefined(
-      req.body && req.body.quantity,
-      req.body && req.body.existencia,
-      req.body && req.body.cantidad
+      req.body && req.body.stock
     ));
     if (!Number.isInteger(quantity) || quantity < 0) {
       return res.status(400).json({ error: 'La existencia debe ser un entero mayor o igual a cero' });
@@ -861,10 +856,10 @@ app.put('/gateway/inventario/:productoId', async (req, res) => {
       {
         method: 'PUT',
         body: JSON.stringify({
-          name: current.name,
-          description: current.description || '',
-          quantity,
-          price: Number(current.price || 0)
+          nombre: current.nombre,
+          descripcion: current.descripcion || '',
+          stock: quantity,
+          precio: Number(current.precio || 0)
         })
       }
     );
@@ -886,9 +881,9 @@ app.post('/gateway/notificaciones', (req, res) =>
   gatewayRequest(res, NOTIFICACIONES_URL, 'notificaciones', '/api/notifications', {
     method: 'POST',
     body: JSON.stringify({
-      service: req.body && (req.body.service || req.body.origen) || 'equipo2',
-      message: req.body && (req.body.message || req.body.mensaje) || '',
-      type: req.body && (req.body.type || req.body.tipo) || 'info'
+      servicio: req.body && req.body.servicio || 'equipo2',
+      mensaje: req.body && req.body.mensaje || '',
+      tipo: req.body && req.body.tipo || 'info'
     })
   })
 );
