@@ -25,7 +25,7 @@ services:
     environment:
       PORT: 3004
       DATABASE_URL: postgresql://tienda:tienda123@postgres:5432/pagos_db
-      NOTIFICACIONES_URL: ${NOTIFICACIONES_URL:-}
+      NOTIFICACIONES_URL: ${NOTIFICACIONES_URL:-http://host.docker.internal:2507}
       REQUEST_TIMEOUT_MS: ${REQUEST_TIMEOUT_MS:-5000}
     ports:
       - "2504:3004"
@@ -52,7 +52,7 @@ services:
       # En Linux, host.docker.internal se habilita abajo para acceder a servicios
       # publicados por otros proyectos Compose en el host (puerto 2502).
       PRODUCTOS_URL: ${PRODUCTOS_URL:-http://host.docker.internal:2502}
-      INVENTARIO_URL: ${INVENTARIO_URL:-}
+      INVENTARIO_URL: ${INVENTARIO_URL:-http://host.docker.internal:2506}
       NOTIFICACIONES_URL: ${NOTIFICACIONES_URL:-}
       REQUEST_TIMEOUT_MS: ${REQUEST_TIMEOUT_MS:-5000}
     extra_hosts:
