@@ -23,17 +23,16 @@ Para detener: `docker compose down`.
 
 ## Configuración de integración
 
-En `.env` configura las direcciones base, sin agregar las rutas de los recursos:
+Copia `.env.example` a `.env`. Todas las plantillas declaran las URLs de los seis microservicios y del frontend para mantener un mapa común. Ajusta `EQUIPO1_HOST`, `EQUIPO2_HOST`, `EQUIPO3_HOST` y `FRONTEND_HOST` a nombres DNS/reservas DHCP de tu red. Si no tienes DNS local, usa las IP actuales en los valores de host/URLs. No uses `localhost` para servicios alojados en otra computadora.
 
-```env
-CLIENTES_URL=
-PRODUCTOS_URL=http://host.docker.internal:2502
-INVENTARIO_URL=
-NOTIFICACIONES_URL=
+Los servicios que Pedidos necesita deben estar accesibles desde el contenedor. Tras cambiar `.env`, recrea los contenedores con:
+
+```powershell
+docker compose up -d --force-recreate pedidos pagos
 ```
 
-Si Productos se ejecuta en la misma VM Linux que este proyecto, `host.docker.internal:2502` permite a Pedidos acceder al puerto 2502 publicado en el host; Compose ya declara el mapeo `host-gateway`. Si Productos está en otra computadora, cambia la URL por `http://IP-REAL:2502`. Si tu archivo `.env` existente contiene una `PRODUCTOS_URL` antigua, actualízala: los valores del archivo `.env` tienen prioridad sobre los valores predeterminados de Compose.
-
+Consulta `ROUTES.md` para la tabla de endpoints. No subas el archivo `.env` con secretos al repositorio.
+ 
 ## Flujo de compra
 
 1. Pedidos valida el cliente mediante el Equipo 1.
