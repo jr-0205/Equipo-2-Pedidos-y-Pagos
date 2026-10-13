@@ -1740,7 +1740,6 @@
       metodoPago: "Método de pago",
       estado: "Estado",
       correo: "Correo",
-      email: "Correo",
       nombre: "Nombre",
       existencia: "Existencia",
       reservado: "Reservado",
@@ -1821,9 +1820,9 @@
       });
       if (manageable) {
         var itemId = item && (item.id != null ? item.id : (item._id != null ? item._id : (id === "productosTable" ? item.productoId : item.clienteId)));
-        var name = item && (item.nombre || item.name || "");
-        var price = item && (item.precio != null ? item.precio : (item.price != null ? item.price : ""));
-        var email = item && (item.email || item.correo || "");
+        var name = item && (item.nombre || "");
+        var price = item && (item.precio != null ? item.precio : "");
+        var email = item && (item.correo || "");
         html += '<td><div class="table-actions">' +
           '<button type="button" class="btn small" data-manage="' + (id === "productosTable" ? "edit-product" : "edit-client") + '" data-id="' + escapeHtml(itemId == null ? "" : itemId) + '" data-name="' + escapeHtml(name) + '" data-price="' + escapeHtml(price) + '" data-email="' + escapeHtml(email) + '">Editar</button>' +
           '<button type="button" class="btn small danger" data-manage="' + (id === "productosTable" ? "delete-product" : "delete-client") + '" data-id="' + escapeHtml(itemId == null ? "" : itemId) + '" data-name="' + escapeHtml(name) + '">Eliminar</button>' +
@@ -2245,10 +2244,10 @@
 
     var body = {
       nombre: el("clienteNombre").value.trim(),
-      email: el("clienteCorreo").value.trim()
+      correo: el("clienteCorreo").value.trim()
     };
 
-    if (!body.nombre || !body.email) {
+    if (!body.nombre || !body.correo) {
       if (status) {
         status.className = "checkout-status bad";
         status.textContent = "Completa nombre y correo electrónico.";
@@ -2396,7 +2395,7 @@
       if (email === null) return;
       email = email.trim();
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast("Escribe un correo electrónico válido"); return; }
-      body = { nombre: updatedName, email: email };
+      body = { nombre: updatedName, correo: email };
     }
     try {
       await api(key, resource + encodeURIComponent(id), { method: "PUT", body: JSON.stringify(body) });
