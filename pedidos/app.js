@@ -238,7 +238,7 @@ async function getInventoryRecord(productoId) {
 
   try {
     const direct = await requestJson(
-      INVENTARIO_URL + '/inventario/' + encodeURIComponent(productoId)
+      INVENTARIO_URL + '/api/products/' + encodeURIComponent(productoId)
     );
     const record = findInventoryRecord(direct, productoId);
     if (record) return record;
@@ -248,7 +248,7 @@ async function getInventoryRecord(productoId) {
     }
   }
 
-  const list = await requestJson(INVENTARIO_URL + '/inventario');
+  const list = await requestJson(INVENTARIO_URL + '/api/products');
   const record = findInventoryRecord(list, productoId);
 
   if (!record) {
@@ -265,12 +265,7 @@ function extractPrice(producto) {
   if (!producto || typeof producto !== 'object') return null;
 
   return numberOrNull(firstDefined(
-    producto.precio,
-    producto.precio_unitario,
-    producto.price,
-    producto.data && producto.data.precio,
-    producto.producto && producto.producto.precio,
-    producto.producto && producto.producto.precio_unitario
+    producto.precio
   ));
 }
 
@@ -278,13 +273,7 @@ function extractStock(inventario) {
   if (!inventario || typeof inventario !== 'object') return null;
 
   return numberOrNull(firstDefined(
-    inventario.existencia,
-    inventario.stock,
-    inventario.cantidad,
-    inventario.data && inventario.data.existencia,
-    inventario.datos && !Array.isArray(inventario.datos) && inventario.datos.existencia,
-    inventario.inventario && inventario.inventario.existencia,
-    inventario.inventario && inventario.inventario.stock
+    inventario.quantity
   ));
 }
 
@@ -377,15 +366,10 @@ async function createClientRecord(input) {
     throw error;
   }
 
-  const nombre = String(
-    firstDefined(input && input.nombre, input && input.name) || ''
-  ).trim();
+  const nombre = String(input && input.nombre || '').trim();
+  const correo = String(input && input.correo || '').trim();
 
-  const email = String(
-    firstDefined(input && input.email, input && input.correo) || ''
-  ).trim();
-
-  if (!nombre || !email) {
+  if (!nombre || !correo) {
     const error = new Error('Nombre y correo electrónico son requeridos');
     error.status = 400;
     throw error;
@@ -394,7 +378,7 @@ async function createClientRecord(input) {
   try {
     return await requestJson(CLIENTES_URL + '/clientes', {
       method: 'POST',
-      body: JSON.stringify({ nombre, email })
+      body: JSON.stringify({ nombre, correo })
     });
   } catch (error) {
     if (error.data && error.data.mensaje) {
@@ -409,8 +393,8 @@ async function createProductRecord(input) {
     error.status = 503;
     throw error;
   }
-  const nombre = String(firstDefined(input && input.nombre, input && input.name) || '').trim();
-  const precio = numberOrNull(firstDefined(input && input.precio, input && input.price));
+  const nombre = String(input && input.nombre || '').trim();
+  const precio = numberOrNull(input && input.precio);
   if (!nombre) {
     const error = new Error('El nombre del producto es requerido');
     error.status = 400;
@@ -508,6 +492,7 @@ app.post('/pedidos', async (req, res) => {
   }
 
   let stockActual = null;
+  let inventarioActual = null;
   const integracion = {
     clienteConsultado: false,
     productoConsultado: false,
@@ -542,6 +527,7 @@ app.post('/pedidos', async (req, res) => {
 
     if (INVENTARIO_URL) {
       const inventario = await getInventoryRecord(productoId);
+      inventarioActual = inventario;
       stockActual = extractStock(inventario);
       integracion.inventarioConsultado = true;
 
@@ -612,13 +598,13 @@ app.post('/pedidos', async (req, res) => {
       const nuevaExistencia = stockActual - cantidad;
 
       try {
-        await requestJson(INVENTARIO_URL + '/inventario/' + productoId, {
+        await requestJson(INVENTARIO_URL + '/api/products/' + productoId, {
           method: 'PUT',
           body: JSON.stringify({
-            existencia: nuevaExistencia,
-            cantidad: nuevaExistencia,
-            delta: -cantidad,
-            pedidoId: Number(pedido.id)
+            name: inventarioActual.name,
+            description: inventarioActual.description || '',
+            quantity: nuevaExistencia,
+            price: Number(inventarioActual.price || 0)
           })
         });
         integracion.inventarioActualizado = true;
@@ -668,8 +654,8 @@ app.get('/gateway/status', async (req, res) => {
     probeHttp(CLIENTES_URL ? CLIENTES_URL + '/clientes' : ''),
     probeHttp(PRODUCTOS_URL ? PRODUCTOS_URL + '/productos' : ''),
     probeHttp(PAGOS_URL + '/health'),
-    probeHttp(INVENTARIO_URL ? INVENTARIO_URL + '/inventario' : ''),
-    probeHttp(NOTIFICACIONES_URL ? NOTIFICACIONES_URL + '/notificaciones' : '')
+    probeHttp(INVENTARIO_URL ? INVENTARIO_URL + '/api/products' : ''),
+    probeHttp(NOTIFICACIONES_URL ? NOTIFICACIONES_URL + '/api/notifications' : '')
   ]);
 
   let pedidosOk = true;
@@ -805,7 +791,7 @@ app.post('/gateway/pagos', (req, res) =>
 );
 
 app.get('/gateway/inventario', (req, res) =>
-  gatewayRequest(res, INVENTARIO_URL, 'inventario', '/inventario')
+  gatewayRequest(res, INVENTARIO_URL, 'inventario', '/api/products')
 );
 
 app.get('/gateway/inventario/:productoId', async (req, res) => {
@@ -834,7 +820,7 @@ app.put('/gateway/inventario/:productoId', (req, res) =>
     res,
     INVENTARIO_URL,
     'inventario',
-    '/inventario/' + encodeURIComponent(req.params.productoId),
+    '/api/products/' + encodeURIComponent(req.params.productoId),
     {
       method: 'PUT',
       body: JSON.stringify(req.body)
@@ -843,13 +829,17 @@ app.put('/gateway/inventario/:productoId', (req, res) =>
 );
 
 app.get('/gateway/notificaciones', (req, res) =>
-  gatewayRequest(res, NOTIFICACIONES_URL, 'notificaciones', '/notificaciones')
+  gatewayRequest(res, NOTIFICACIONES_URL, 'notificaciones', '/api/notifications')
 );
 
 app.post('/gateway/notificaciones', (req, res) =>
-  gatewayRequest(res, NOTIFICACIONES_URL, 'notificaciones', '/notificaciones', {
+  gatewayRequest(res, NOTIFICACIONES_URL, 'notificaciones', '/api/notifications', {
     method: 'POST',
-    body: JSON.stringify(req.body)
+    body: JSON.stringify({
+      service: req.body && (req.body.service || req.body.origen) || 'equipo2',
+      message: req.body && (req.body.message || req.body.mensaje) || '',
+      type: req.body && (req.body.type || req.body.tipo) || 'info'
+    })
   })
 );
 
