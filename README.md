@@ -10,14 +10,13 @@ Microservicios REST con Node.js, Express, PostgreSQL y Docker Compose. Este repo
 
 ## Inicio
 
-Copia `.env.example` a `.env`. El archivo trae como ejemplo la IP `192.168.100.250`; confirma que sea la IP actual de la VM y cambia las IP si los otros equipos están en computadoras distintas. Después ejecuta:
+Copia `.env.example` a `.env` si todavía no tienes uno. Revisa las direcciones de los otros equipos antes de iniciar:
 
-```powershell
+```bash
 docker compose up --build -d
 docker compose ps
 ```
 
-Para ver el estado de salud: `docker compose ps`. Espera a que Pedidos y Pagos aparezcan como `healthy`.
 Para ver logs: `docker compose logs --tail=100 pedidos pagos postgres`.
 Pruebas rápidas: `curl http://localhost:2503/health`, `curl http://localhost:2504/health` y `curl http://localhost:2503/gateway/status`.
 Para detener: `docker compose down`.
@@ -27,13 +26,13 @@ Para detener: `docker compose down`.
 En `.env` configura las direcciones base, sin agregar las rutas de los recursos:
 
 ```env
-CLIENTES_URL=http://IP-EQUIPO-1:2501
-PRODUCTOS_URL=http://IP-EQUIPO-1:2502
-INVENTARIO_URL=http://IP-EQUIPO-3:2506
-NOTIFICACIONES_URL=http://IP-EQUIPO-3:2507
+CLIENTES_URL=
+PRODUCTOS_URL=http://host.docker.internal:2502
+INVENTARIO_URL=
+NOTIFICACIONES_URL=
 ```
 
-Las URLs se dejan vacías en `.env.example` para no asumir direcciones IP de la red.
+Si Productos se ejecuta en la misma VM Linux que este proyecto, `host.docker.internal:2502` permite a Pedidos acceder al puerto 2502 publicado en el host; Compose ya declara el mapeo `host-gateway`. Si Productos está en otra computadora, cambia la URL por `http://IP-REAL:2502`. Si tu archivo `.env` existente contiene una `PRODUCTOS_URL` antigua, actualízala: los valores del archivo `.env` tienen prioridad sobre los valores predeterminados de Compose.
 
 ## Flujo de compra
 
@@ -66,10 +65,11 @@ Ejemplo:
   "clienteId": 1,
   "productoId": 1,
   "cantidad": 2,
-  "precioUnitario": 75.50,
   "metodoPago": "tarjeta"
 }
 ```
+
+Pedidos obtiene el precio de `productoId` desde Productos. También se puede enviar `precioUnitario` explícitamente cuando sea necesario.
 
 Base URL desde el host: `http://localhost:2503`.
 
