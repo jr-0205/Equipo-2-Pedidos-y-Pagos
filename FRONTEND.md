@@ -172,10 +172,10 @@ El microservicio de Notificaciones espera que Pagos envíe una petición `POST /
 }
 ```
 
-El Equipo 2 conserva `NOTIFICACIONES_URL` como variable de entorno; no se fija la IP en el código. Si el servicio de Notificaciones está en `192.200.5.142:3006`, configura localmente:
+El Equipo 2 conserva `NOTIFICACIONES_URL` como variable de entorno; no se fija la IP en el código. Si el servicio de Notificaciones está en `IP-EQUIPO-3:20003`, configura localmente:
 
 ```env
-NOTIFICACIONES_URL=http://192.200.5.142:3006
+NOTIFICACIONES_URL=http://IP-EQUIPO-3:20003
 ```
 
 Pagos envía la notificación después de confirmar el pago.
