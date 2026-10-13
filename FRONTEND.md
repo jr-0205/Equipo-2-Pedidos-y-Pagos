@@ -27,8 +27,8 @@ Pedidos :3003
    +-- /gateway/clientes      -> Equipo 1 :3001
    +-- /gateway/productos     -> Equipo 1 :3002
    +-- /gateway/pagos         -> Equipo 2 :3004
-   +-- /gateway/inventario    -> Equipo 3 :3005
-   +-- /gateway/notificaciones-> Equipo 3 :3006
+   +-- /gateway/inventario    -> Equipo 3 :20002
+   +-- /gateway/notificaciones-> Equipo 3 :20003
 ```
 
 Esto evita que el front dependa de la configuración CORS de las computadoras de los otros equipos.
@@ -130,11 +130,11 @@ El menú **Flujo** permite demostrar en una sola pantalla el recorrido real de u
 
 1. **Clientes** — `GET /clientes/:id`: valida al cliente.
 2. **Productos** — `GET /productos/:id`: obtiene producto y precio.
-3. **Inventario** — `GET /inventario/:productoId`: comprueba existencia.
+3. **Inventario** — `GET /api/products/:id` (Equipo 3, puerto 20002): comprueba existencia.
 4. **Pedidos** — `POST /pedidos`: registra el pedido y orquesta el proceso.
 5. **Pagos** — `POST /pagos`: registra el pago.
 6. **Inventario** — `PUT /inventario/:productoId`: descuenta existencias.
-7. **Notificaciones** — `POST /notificaciones`: registra el mensaje final.
+7. **Notificaciones** — `POST /api/notifications` (Equipo 3, puerto 20003): registra el mensaje final.
 
 Los pasos se marcan visualmente como **completados**, **omitidos** o **fallidos** usando los datos reales devueltos por el microservicio Pedidos.
 
@@ -162,7 +162,7 @@ Esta vista está pensada para mostrar el sistema desde la perspectiva de un usua
 
 ### Contrato real de Notificaciones
 
-El microservicio de Notificaciones espera que Pagos envíe una petición `POST /notificaciones` con este formato:
+El microservicio de Notificaciones espera que Pagos envíe una petición `POST /api/notifications` (Equipo 3, puerto 20003) con este formato:
 
 ```json
 {
