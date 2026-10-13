@@ -10,14 +10,16 @@ Microservicios REST con Node.js, Express, PostgreSQL y Docker Compose. Este repo
 
 ## Inicio
 
-Copia `.env.example` a `.env`, establece las IP reales de los otros equipos y ejecuta:
+Copia `.env.example` a `.env`. El archivo trae como ejemplo la IP `192.168.100.250`; confirma que sea la IP actual de la VM y cambia las IP si los otros equipos están en computadoras distintas. Después ejecuta:
 
 ```powershell
 docker compose up --build -d
 docker compose ps
 ```
 
+Para ver el estado de salud: `docker compose ps`. Espera a que Pedidos y Pagos aparezcan como `healthy`.
 Para ver logs: `docker compose logs --tail=100 pedidos pagos postgres`.
+Pruebas rápidas: `curl http://localhost:2503/health`, `curl http://localhost:2504/health` y `curl http://localhost:2503/gateway/status`.
 Para detener: `docker compose down`.
 
 ## Configuración de integración
