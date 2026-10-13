@@ -764,9 +764,37 @@ app.post('/gateway/productos', async (req, res) => {
     });
   }
 });
-app.put('/gateway/productos/:id', (req, res) =>
-  gatewayMutation(res, PRODUCTOS_URL, 'productos', '/productos/' + encodeURIComponent(req.params.id), 'PUT', req.body)
-);
+app.put('/gateway/productos/:id', async (req, res) => {
+  if (!PRODUCTOS_URL) {
+    return res.status(503).json({ error: 'Servicio de productos no configurado' });
+  }
+  try {
+    const current = await getServiceRecord(PRODUCTOS_URL, 'productos', req.params.id);
+    const nombre = String(req.body && req.body.nombre || '').trim();
+    const precio = numberOrNull(req.body && req.body.precio);
+    if (!nombre || precio === null || precio < 0) {
+      return res.status(400).json({ error: 'Los campos nombre y precio son obligatorios; precio debe ser no negativo' });
+    }
+    const updated = await requestJson(
+      PRODUCTOS_URL + '/productos/' + encodeURIComponent(req.params.id),
+      {
+        method: 'PUT',
+        body: JSON.stringify({
+          nombre,
+          precio,
+          stock: Number(current.stock || 0)
+        })
+      }
+    );
+    return res.json(updated);
+  } catch (error) {
+    return res.status(error.status || 502).json({
+      error: 'No fue posible actualizar el producto',
+      detalle: error.message,
+      upstream: error.data || null
+    });
+  }
+});
 app.patch('/gateway/productos/:id', (req, res) =>
   gatewayMutation(res, PRODUCTOS_URL, 'productos', '/productos/' + encodeURIComponent(req.params.id), 'PATCH', req.body)
 );
