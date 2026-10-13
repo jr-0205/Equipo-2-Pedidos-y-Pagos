@@ -28,7 +28,7 @@ services:
       NOTIFICACIONES_URL: ${NOTIFICACIONES_URL:-}
       REQUEST_TIMEOUT_MS: ${REQUEST_TIMEOUT_MS:-5000}
     ports:
-      - "3004:3004"
+      - "2504:3004"
     depends_on:
       postgres:
         condition: service_healthy
@@ -48,7 +48,7 @@ services:
       NOTIFICACIONES_URL: ${NOTIFICACIONES_URL:-}
       REQUEST_TIMEOUT_MS: ${REQUEST_TIMEOUT_MS:-5000}
     ports:
-      - "3003:3003"
+      - "2503:3003"
     depends_on:
       postgres:
         condition: service_healthy
