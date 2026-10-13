@@ -135,10 +135,10 @@ El servicio `pedidos` registra el pedido y envía automáticamente la informaci�
 Configura `.env` con las IP reales:
 
 ```env
-CLIENTES_URL=http://192.168.1.101:3001
-PRODUCTOS_URL=http://192.168.1.101:3002
-INVENTARIO_URL=http://192.168.1.103:3005
-NOTIFICACIONES_URL=http://192.168.1.103:3006
+CLIENTES_URL=http://IP-EQUIPO-1:3001
+PRODUCTOS_URL=http://IP-EQUIPO-1:3002
+INVENTARIO_URL=http://IP-EQUIPO-3:20002
+NOTIFICACIONES_URL=http://IP-EQUIPO-3:20003
 ```
 
 Después:
@@ -151,13 +151,13 @@ Flujo de pedidos:
 
 1. consulta `clientes/:id`;
 2. consulta `productos/:id`;
-3. consulta `inventario/:productoId`;
+3. consulta `GET /api/products/:id` del servicio Inventario del Equipo 3;
 4. registra el pedido;
 5. envía el pago a `pagos`;
-6. actualiza inventario;
-7. envía una notificación.
+6. actualiza `quantity` mediante `PUT /api/products/:id` del Equipo 3;
+7. envía una notificación a `POST /api/notifications` del Equipo 3;
 
-El precio puede venir como `precio`, `precio_unitario` o `price`; la existencia como `existencia`, `stock` o `cantidad`.
+Contrato Equipo 1: Clientes usa `id`, `nombre` y `correo`; Productos usa `id`, `nombre`, `precio` y `stock`. Pedidos lee el precio del catálogo exclusivamente desde `precio`. El adaptador de inventario utiliza la API actual del Equipo 3 (`/api/products`, puerto publicado 20002) y su campo `quantity`; lo estandarizaremos cuando editemos el Equipo 3.
 
 ## API de pedidos
 
