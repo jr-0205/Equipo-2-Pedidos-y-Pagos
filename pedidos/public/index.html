@@ -1742,6 +1742,13 @@
       correo: "Correo",
       nombre: "Nombre",
       existencia: "Existencia",
+      quantity: "Existencia",
+      name: "Nombre",
+      description: "Descripción",
+      price: "Precio",
+      service: "Servicio",
+      message: "Mensaje",
+      type: "Tipo",
       reservado: "Reservado",
       creado_en: "Creado",
       actualizado_en: "Actualizado",
@@ -1876,7 +1883,7 @@
   }
 
   async function renderInventoryDetail(data) {
-    var stock = data && (data.existencia != null ? data.existencia : data.stock != null ? data.stock : data.cantidad);
+    var stock = data && (data.quantity != null ? data.quantity : data.existencia != null ? data.existencia : data.stock != null ? data.stock : data.cantidad);
     var reserved = data && (data.reservado != null ? data.reservado : 0);
     var productId = inventoryProductIdFromRecord(data);
     var available = Number(stock) - Number(reserved || 0);
@@ -1924,7 +1931,7 @@
       target.innerHTML = inventory.map(function (item) {
         var productId = inventoryProductIdFromRecord(item);
         var product = productMap[String(productId)] || null;
-        var stock = Number(item.existencia != null ? item.existencia : item.stock != null ? item.stock : item.cantidad);
+        var stock = Number(item.quantity != null ? item.quantity : item.existencia != null ? item.existencia : item.stock != null ? item.stock : item.cantidad);
         var reserved = Number(item.reservado != null ? item.reservado : 0);
         var available = stock - reserved;
         var stockClass = Number.isFinite(available) && available <= 5 ? "inventory-stock-low" : "inventory-stock-good";
