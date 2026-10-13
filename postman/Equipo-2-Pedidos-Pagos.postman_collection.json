@@ -2,13 +2,13 @@
   "info": {
     "_postman_id": "c3ef65fe-76ad-4fde-8e36-equipo2pedidospagos",
     "name": "Equipo 2 - Pedidos y Pagos",
-    "description": "Colección para probar los microservicios pedidos (3003) y pagos (3004).",
+    "description": "Colección para probar Pedidos y Pagos con los puertos publicados por Docker Compose: Pedidos 2503 y Pagos 2504. Cambia la variable host si ejecutas Postman en otra máquina.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "host",
-      "value": "localhost"
+      "value": "192.168.100.250"
     }
   ],
   "item": [
@@ -16,7 +16,7 @@
       "name": "Health pedidos",
       "request": {
         "method": "GET",
-        "url": "http://{{host}}:3003/health"
+        "url": "http://{{host}}:2503/health"
       }
     },
     {
@@ -33,21 +33,21 @@
           "mode": "raw",
           "raw": "{\n  \"clienteId\": 1,\n  \"productoId\": 1,\n  \"cantidad\": 2,\n  \"precioUnitario\": 75.50,\n  \"metodoPago\": \"tarjeta\"\n}"
         },
-        "url": "http://{{host}}:3003/pedidos"
+        "url": "http://{{host}}:2503/pedidos"
       }
     },
     {
       "name": "Listar pedidos",
       "request": {
         "method": "GET",
-        "url": "http://{{host}}:3003/pedidos"
+        "url": "http://{{host}}:2503/pedidos"
       }
     },
     {
       "name": "Health pagos",
       "request": {
         "method": "GET",
-        "url": "http://{{host}}:3004/health"
+        "url": "http://{{host}}:2504/health"
       }
     },
     {
@@ -64,14 +64,14 @@
           "mode": "raw",
           "raw": "{\n  \"pedidoId\": 999,\n  \"monto\": 150.00,\n  \"metodo\": \"tarjeta\"\n}"
         },
-        "url": "http://{{host}}:3004/pagos"
+        "url": "http://{{host}}:2504/pagos"
       }
     },
     {
       "name": "Listar pagos",
       "request": {
         "method": "GET",
-        "url": "http://{{host}}:3004/pagos"
+        "url": "http://{{host}}:2504/pagos"
       }
     }
   ]
