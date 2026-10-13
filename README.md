@@ -1,6 +1,6 @@
 # Equipo 2 — Pedidos y Pagos
 
-Microservicios REST con Node.js, Express, PostgreSQL y Docker Compose. Este repositorio contiene las API y su persistencia; la aplicación cliente se mantiene en un repositorio independiente.
+Microservicios REST con Node.js, Express, PostgreSQL y Docker Compose. Este repositorio contiene las API y su persistencia.
 
 ## Servicios y puertos publicados
 
