@@ -136,6 +136,7 @@ function extractCollection(payload) {
 function inventoryProductId(item) {
   if (!item || typeof item !== 'object') return null;
   return firstDefined(
+    item.id,
     item.productoId,
     item.producto_id,
     item.productId,
@@ -220,9 +221,7 @@ function findInventoryRecord(payload, productoId) {
   }
 
   if (
-    payload.existencia !== undefined ||
-    payload.stock !== undefined ||
-    payload.cantidad !== undefined
+    payload.quantity !== undefined
   ) {
     return payload;
   }
@@ -815,18 +814,41 @@ app.get('/gateway/inventario/:productoId', async (req, res) => {
   }
 });
 
-app.put('/gateway/inventario/:productoId', (req, res) =>
-  gatewayRequest(
-    res,
-    INVENTARIO_URL,
-    'inventario',
-    '/api/products/' + encodeURIComponent(req.params.productoId),
-    {
-      method: 'PUT',
-      body: JSON.stringify(req.body)
+app.put('/gateway/inventario/:productoId', async (req, res) => {
+  if (!INVENTARIO_URL) {
+    return res.status(503).json({ error: 'Servicio de inventario no configurado' });
+  }
+  try {
+    const current = await getInventoryRecord(req.params.productoId);
+    const quantity = Number(firstDefined(
+      req.body && req.body.quantity,
+      req.body && req.body.existencia,
+      req.body && req.body.cantidad
+    ));
+    if (!Number.isInteger(quantity) || quantity < 0) {
+      return res.status(400).json({ error: 'La existencia debe ser un entero mayor o igual a cero' });
     }
-  )
-);
+    const updated = await requestJson(
+      INVENTARIO_URL + '/api/products/' + encodeURIComponent(req.params.productoId),
+      {
+        method: 'PUT',
+        body: JSON.stringify({
+          name: current.name,
+          description: current.description || '',
+          quantity,
+          price: Number(current.price || 0)
+        })
+      }
+    );
+    return res.json(updated);
+  } catch (error) {
+    return res.status(error.status || 502).json({
+      error: 'No fue posible actualizar inventario',
+      detalle: error.message,
+      upstream: error.data || null
+    });
+  }
+});
 
 app.get('/gateway/notificaciones', (req, res) =>
   gatewayRequest(res, NOTIFICACIONES_URL, 'notificaciones', '/api/notifications')
