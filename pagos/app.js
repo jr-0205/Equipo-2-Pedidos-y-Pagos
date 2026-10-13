@@ -64,12 +64,12 @@ async function notifyApprovedPayment(pago) {
   }
 
   try {
-    const notificacion = await requestJson(NOTIFICACIONES_URL + '/notificaciones', {
+    const notificacion = await requestJson(NOTIFICACIONES_URL + '/api/notifications', {
       method: 'POST',
       body: JSON.stringify({
-        origen: 'pagos',
-        mensaje: 'Pago aprobado y compra realizada con exito',
-        tipo: 'SUCCESS'
+        service: 'pagos',
+        message: 'Pago aprobado y compra realizada con éxito',
+        type: 'success'
       })
     });
 
