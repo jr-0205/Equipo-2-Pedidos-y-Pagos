@@ -1,6 +1,17 @@
+# Dependencias
 node_modules/
+
+# Configuracion local con IPs reales: nunca se versiona, pero .env.example si
 .env
+.env.*
+!.env.example
+
+# Registros
 npm-debug.log*
+*.log
+
+# Sistema / editor
 .DS_Store
+Thumbs.db
 .vscode/
 coverage/

@@ -15,6 +15,11 @@ const PRODUCTOS_URL = normalizeServiceBaseUrl(process.env.PRODUCTOS_URL || '', '
 const INVENTARIO_URL = normalizeServiceBaseUrl(process.env.INVENTARIO_URL || '', 'inventario');
 const NOTIFICACIONES_URL = normalizeServiceBaseUrl(process.env.NOTIFICACIONES_URL || '', 'notificaciones');
 
+// Rutas canónicas acordadas en reglas.md y rutas heredadas que aún usa el Equipo 3.
+// Se prueban en orden: primero el acuerdo común, luego la variante antigua.
+const INVENTARIO_PATHS = ['/inventario', '/api/products'];
+const NOTIFICACIONES_PATHS = ['/notificaciones', '/api/notifications'];
+
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 
@@ -218,9 +223,8 @@ function findInventoryRecord(payload, productoId) {
     return payload;
   }
 
-  if (
-    payload.quantity !== undefined
-  ) {
+  // El Equipo 3 usa "quantity"; el contrato acordado usa "stock".
+  if (payload.quantity !== undefined || payload.stock !== undefined) {
     return payload;
   }
 
@@ -230,39 +234,92 @@ function findInventoryRecord(payload, productoId) {
   ) || null;
 }
 
+// Consulta inventario probando primero la ruta canónica (/inventario)
+// y después la ruta heredada del Equipo 3 (/api/products).
 async function getInventoryRecord(productoId) {
   if (!INVENTARIO_URL) return null;
 
-  try {
-    const direct = await requestJson(
-      INVENTARIO_URL + '/api/products/' + encodeURIComponent(productoId)
-    );
-    const record = findInventoryRecord(direct, productoId);
-    if (record) return record;
-  } catch (error) {
-    if (error.status && ![404, 405].includes(error.status)) {
-      throw error;
+  let lastError = null;
+
+  for (const basePath of INVENTARIO_PATHS) {
+    try {
+      const direct = await requestJson(
+        INVENTARIO_URL + basePath + '/' + encodeURIComponent(productoId)
+      );
+      const record = findInventoryRecord(direct, productoId);
+
+      if (record) return record;
+      if (direct && typeof direct === 'object' && !Array.isArray(direct)) {
+        return direct;
+      }
+    } catch (error) {
+      if (error.status && ![404, 405].includes(error.status)) {
+        lastError = error;
+      }
     }
   }
 
-  const list = await requestJson(INVENTARIO_URL + '/api/products');
-  const record = findInventoryRecord(list, productoId);
+  for (const basePath of INVENTARIO_PATHS) {
+    try {
+      const list = await requestJson(INVENTARIO_URL + basePath);
+      const record = findInventoryRecord(list, productoId);
 
-  if (!record) {
-    const error = new Error('Producto ' + productoId + ' no encontrado en inventario');
-    error.status = 404;
-    error.data = list;
-    throw error;
+      if (record) return record;
+    } catch (error) {
+      if (error.status && ![404, 405].includes(error.status)) {
+        lastError = error;
+      }
+    }
   }
 
-  return record;
+  if (lastError) throw lastError;
+
+  const error = new Error('Producto ' + productoId + ' no encontrado en inventario');
+  error.status = 404;
+  throw error;
+}
+
+// Actualiza la existencia del producto en inventario. Se envía el mismo dato con
+// los dos vocabularios (español e inglés) para que funcione con cualquiera de las
+// versiones del servicio de Inventario.
+async function updateInventoryStock(productoId, inventarioActual, nuevaExistencia) {
+  const payload = {
+    nombre: inventarioActual.nombre ?? inventarioActual.name ?? '',
+    name: inventarioActual.nombre ?? inventarioActual.name ?? '',
+    descripcion: inventarioActual.descripcion ?? inventarioActual.description ?? '',
+    description: inventarioActual.descripcion ?? inventarioActual.description ?? '',
+    stock: nuevaExistencia,
+    quantity: nuevaExistencia,
+    precio: numberOrNull(firstDefined(inventarioActual.precio, inventarioActual.price)) ?? 0,
+    price: numberOrNull(firstDefined(inventarioActual.precio, inventarioActual.price)) ?? 0
+  };
+
+  const id = encodeURIComponent(productoId);
+  let lastError = null;
+
+  for (const basePath of INVENTARIO_PATHS) {
+    try {
+      return await requestJson(INVENTARIO_URL + basePath + '/' + id, {
+        method: 'PUT',
+        body: JSON.stringify(payload)
+      });
+    } catch (error) {
+      if (error.status && ![404, 405].includes(error.status)) {
+        throw error;
+      }
+      lastError = error;
+    }
+  }
+
+  throw lastError || new Error('No fue posible actualizar inventario');
 }
 
 function extractPrice(producto) {
   if (!producto || typeof producto !== 'object') return null;
 
   return numberOrNull(firstDefined(
-    producto.precio
+    producto.precio,
+    producto.price
   ));
 }
 
@@ -270,8 +327,41 @@ function extractStock(inventario) {
   if (!inventario || typeof inventario !== 'object') return null;
 
   return numberOrNull(firstDefined(
-    inventario.stock
+    inventario.stock,
+    inventario.quantity,
+    inventario.existencia,
+    inventario.inventario
   ));
+}
+
+// Respuestas del Equipo 2: se conservan los nombres de columna y además se agregan
+// los alias en camelCase del contrato acordado (clienteId, productoId, ...).
+function serializePedido(row) {
+  if (!row || typeof row !== 'object') return row;
+
+  return {
+    ...row,
+    clienteId: firstDefined(row.clienteId, row.cliente_id),
+    productoId: firstDefined(row.productoId, row.producto_id),
+    precioUnitario: firstDefined(row.precioUnitario, row.precio_unitario),
+    pagoId: firstDefined(row.pagoId, row.pago_id),
+    creadoEn: firstDefined(row.creadoEn, row.creado_en),
+    actualizadoEn: firstDefined(row.actualizadoEn, row.actualizado_en)
+  };
+}
+
+function serializePago(row) {
+  if (!row || typeof row !== 'object') return row;
+
+  const pago = row.pago ? row.pago : row;
+  const serializado = {
+    ...pago,
+    pedidoId: firstDefined(pago.pedidoId, pago.pedido_id),
+    metodoPago: firstDefined(pago.metodoPago, pago.metodo_pago, pago.metodo),
+    creadoEn: firstDefined(pago.creadoEn, pago.creado_en)
+  };
+
+  return row.pago ? { ...row, pago: serializado } : serializado;
 }
 
 async function requestJson(url, options = {}) {
@@ -415,14 +505,46 @@ async function createProductRecord(input) {
   }
 }
 
+const ENDPOINTS = [
+  'GET /health',
+  'GET /',
+  'GET /pedidos',
+  'GET /pedidos/:id',
+  'POST /pedidos',
+  'GET /gateway/status',
+  'GET|POST /gateway/clientes',
+  'GET|POST /gateway/productos',
+  'GET|POST /gateway/pagos',
+  'GET|PUT /gateway/inventario',
+  'GET|POST /gateway/notificaciones'
+];
+
+app.get('/', (req, res) => res.json({
+  servicio: 'pedidos',
+  equipo: 'Equipo 2 - Pedidos y Pagos',
+  puertoInterno: PORT,
+  contrato: {
+    request: ['clienteId', 'productoId', 'cantidad', 'precioUnitario?', 'metodoPago?'],
+    response: ['id', 'clienteId', 'productoId', 'cantidad', 'precioUnitario', 'total', 'estado', 'pagoId', 'creadoEn']
+  },
+  integraciones: {
+    pagos: PAGOS_URL,
+    clientes: CLIENTES_URL || null,
+    productos: PRODUCTOS_URL || null,
+    inventario: INVENTARIO_URL || null,
+    notificaciones: NOTIFICACIONES_URL || null
+  },
+  endpoints: ENDPOINTS
+}));
 
 app.get('/health', async (req, res) => {
   try {
     await pool.query('SELECT 1');
     res.json({
+      status: 'ok',
       ok: true,
       servicio: 'pedidos',
-      puerto: PORT,
+      puertoInterno: PORT,
       postgres: 'ok',
       integraciones: {
         clientes: Boolean(CLIENTES_URL),
@@ -433,14 +555,14 @@ app.get('/health', async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(503).json({ ok: false, servicio: 'pedidos', error: error.message });
+    res.status(503).json({ status: 'error', ok: false, servicio: 'pedidos', error: error.message });
   }
 });
 
 app.get('/pedidos', async (req, res, next) => {
   try {
     const result = await pool.query('SELECT * FROM pedidos ORDER BY id DESC');
-    res.json(result.rows);
+    res.json(result.rows.map(serializePedido));
   } catch (error) {
     next(error);
   }
@@ -459,18 +581,19 @@ app.get('/pedidos/:id', async (req, res, next) => {
       return res.status(404).json({ error: 'Pedido no encontrado' });
     }
 
-    res.json(result.rows[0]);
+    res.json(serializePedido(result.rows[0]));
   } catch (error) {
     next(error);
   }
 });
 
 app.post('/pedidos', async (req, res) => {
-  const clienteId = Number(req.body.clienteId ?? req.body.cliente_id);
-  const productoId = Number(req.body.productoId ?? req.body.producto_id);
-  const cantidad = Number(req.body.cantidad);
-  const metodoPago = String(req.body.metodoPago ?? req.body.metodo ?? 'tarjeta').trim();
-  let precioUnitario = numberOrNull(req.body.precioUnitario ?? req.body.precio_unitario);
+  const body = req.body || {};
+  const clienteId = Number(body.clienteId ?? body.cliente_id);
+  const productoId = Number(body.productoId ?? body.producto_id);
+  const cantidad = Number(body.cantidad);
+  const metodoPago = String(body.metodoPago ?? body.metodo ?? 'tarjeta').trim();
+  let precioUnitario = numberOrNull(body.precioUnitario ?? body.precio_unitario);
 
   if (!Number.isInteger(clienteId) || clienteId <= 0) {
     return res.status(400).json({ error: 'clienteId debe ser un entero mayor que 0' });
@@ -558,28 +681,39 @@ app.post('/pedidos', async (req, res) => {
     let pedido = insert.rows[0];
 
     let pago;
+    let advertenciaNotificacion = null;
     try {
-      pago = await requestJson(PAGOS_URL + '/pagos', {
+      const pagoResponse = await requestJson(PAGOS_URL + '/pagos', {
         method: 'POST',
         body: JSON.stringify({
           pedidoId: Number(pedido.id),
           monto: total,
           metodo: metodoPago,
+          metodoPago,
           origen: 'pedidos'
         })
       });
+
+      // Pagos responde { pago, integracion, advertenciaNotificacion, notificacion }.
+      // Aquí se guarda el pago "plano" y la advertencia por separado para que el
+      // contrato de POST /pedidos sea { pedido, pago, integracion }.
+      pago = pagoResponse && pagoResponse.pago ? pagoResponse.pago : pagoResponse;
       integracion.pagoRegistrado = true;
       integracion.notificacionEnviada = Boolean(
-        pago &&
-        pago.integracion &&
-        pago.integracion.notificacionEnviada
+        pagoResponse &&
+        pagoResponse.integracion &&
+        pagoResponse.integracion.notificacionEnviada
       );
+      advertenciaNotificacion =
+        (pagoResponse && pagoResponse.advertenciaNotificacion) ||
+        (pagoResponse && pagoResponse.pago && pagoResponse.pago.advertenciaNotificacion) ||
+        null;
     } catch (error) {
       pedido = await setPedidoState(pedido.id, 'PAGO_FALLIDO');
       return res.status(502).json({
         error: 'El pedido se creó, pero no fue posible registrar el pago',
         detalle: error.message,
-        pedido,
+        pedido: serializePedido(pedido),
         integracion
       });
     }
@@ -588,45 +722,31 @@ app.post('/pedidos', async (req, res) => {
       pago && pago.id,
       pago && pago.pago && pago.pago.id
     ));
-
     pedido = await setPedidoState(pedido.id, 'PAGADO', pagoId);
 
-    if (INVENTARIO_URL && stockActual !== null) {
+    if (INVENTARIO_URL && inventarioActual && stockActual !== null) {
       const nuevaExistencia = stockActual - cantidad;
 
       try {
-        await requestJson(INVENTARIO_URL + '/api/products/' + productoId, {
-          method: 'PUT',
-          body: JSON.stringify({
-            nombre: inventarioActual.nombre,
-            descripcion: inventarioActual.descripcion || '',
-            stock: nuevaExistencia,
-            precio: Number(inventarioActual.precio || 0)
-          })
-        });
+        await updateInventoryStock(productoId, inventarioActual, nuevaExistencia);
         integracion.inventarioActualizado = true;
       } catch (error) {
         pedido = await setPedidoState(pedido.id, 'PAGADO_PENDIENTE_INVENTARIO', pagoId);
         return res.status(502).json({
           error: 'El pago fue aprobado, pero no fue posible actualizar inventario',
           detalle: error.message,
-          pedido,
-          pago,
+          pedido: serializePedido(pedido),
+          pago: serializePago(pago),
           integracion
         });
       }
     }
 
-    const advertenciaNotificacion =
-      pago && pago.advertenciaNotificacion
-        ? pago.advertenciaNotificacion
-        : null;
-
     const finalResult = await pool.query('SELECT * FROM pedidos WHERE id = $1', [pedido.id]);
 
     res.status(201).json({
-      pedido: finalResult.rows[0],
-      pago,
+      pedido: serializePedido(finalResult.rows[0]),
+      pago: serializePago(pago),
       integracion,
       advertenciaNotificacion
     });
@@ -650,8 +770,8 @@ app.get('/gateway/status', async (req, res) => {
     probeHttp(CLIENTES_URL ? CLIENTES_URL + '/clientes' : ''),
     probeHttp(PRODUCTOS_URL ? PRODUCTOS_URL + '/productos' : ''),
     probeHttp(PAGOS_URL + '/health'),
-    probeHttp(INVENTARIO_URL ? INVENTARIO_URL + '/api/products' : ''),
-    probeHttp(NOTIFICACIONES_URL ? NOTIFICACIONES_URL + '/api/notifications' : '')
+    probeHttp(INVENTARIO_URL ? INVENTARIO_URL + INVENTARIO_PATHS[0] : ''),
+    probeHttp(NOTIFICACIONES_URL ? NOTIFICACIONES_URL + NOTIFICACIONES_PATHS[0] : '')
   ]);
 
   let pedidosOk = true;
@@ -799,8 +919,25 @@ app.delete('/gateway/productos/:id', (req, res) =>
   gatewayMutation(res, PRODUCTOS_URL, 'productos', '/productos/' + encodeURIComponent(req.params.id), 'DELETE')
 );
 
-app.get('/gateway/pagos', (req, res) =>
-  gatewayRequest(res, PAGOS_URL, 'pagos', '/pagos')
+app.get('/gateway/pagos', async (req, res) => {
+  if (!PAGOS_URL) {
+    return res.status(503).json({ error: 'Servicio de pagos no configurado' });
+  }
+  try {
+    const data = await requestJson(PAGOS_URL + '/pagos');
+    const lista = Array.isArray(data) ? data.map(serializePago) : data;
+    return res.json(lista);
+  } catch (error) {
+    return res.status(error.status || 502).json({
+      error: 'No fue posible consultar pagos',
+      detalle: error.message,
+      upstream: error.data || null
+    });
+  }
+});
+
+app.get('/gateway/pagos/pedido/:pedidoId', (req, res) =>
+  gatewayRequest(res, PAGOS_URL, 'pagos', '/pagos/pedido/' + encodeURIComponent(req.params.pedidoId))
 );
 
 app.get('/gateway/pagos/:id', (req, res) =>
@@ -814,9 +951,31 @@ app.post('/gateway/pagos', (req, res) =>
   })
 );
 
-app.get('/gateway/inventario', (req, res) =>
-  gatewayRequest(res, INVENTARIO_URL, 'inventario', '/api/products')
-);
+app.get('/gateway/inventario', async (req, res) => {
+  if (!INVENTARIO_URL) {
+    return res.status(503).json({
+      error: 'Servicio no configurado',
+      servicio: 'inventario',
+      detalle: 'Configura INVENTARIO_URL en el archivo .env del Equipo 2.'
+    });
+  }
+
+  for (const basePath of INVENTARIO_PATHS) {
+    try {
+      return res.json(await requestJson(INVENTARIO_URL + basePath));
+    } catch (error) {
+      if (!error.status || ![404, 405].includes(error.status)) {
+        return res.status(error.status || 502).json({
+          error: 'No fue posible consultar inventario',
+          detalle: error.message,
+          upstream: error.data || null
+        });
+      }
+    }
+  }
+
+  return res.status(502).json({ error: 'No fue posible consultar inventario' });
+});
 
 app.get('/gateway/inventario/:productoId', async (req, res) => {
   if (!INVENTARIO_URL) {
@@ -846,23 +1005,13 @@ app.put('/gateway/inventario/:productoId', async (req, res) => {
   try {
     const current = await getInventoryRecord(req.params.productoId);
     const quantity = Number(firstDefined(
-      req.body && req.body.stock
+      req.body && req.body.stock,
+      req.body && req.body.quantity
     ));
     if (!Number.isInteger(quantity) || quantity < 0) {
       return res.status(400).json({ error: 'La existencia debe ser un entero mayor o igual a cero' });
     }
-    const updated = await requestJson(
-      INVENTARIO_URL + '/api/products/' + encodeURIComponent(req.params.productoId),
-      {
-        method: 'PUT',
-        body: JSON.stringify({
-          nombre: current.nombre,
-          descripcion: current.descripcion || '',
-          stock: quantity,
-          precio: Number(current.precio || 0)
-        })
-      }
-    );
+    const updated = await updateInventoryStock(req.params.productoId, current, quantity);
     return res.json(updated);
   } catch (error) {
     return res.status(error.status || 502).json({
@@ -873,20 +1022,95 @@ app.put('/gateway/inventario/:productoId', async (req, res) => {
   }
 });
 
-app.get('/gateway/notificaciones', (req, res) =>
-  gatewayRequest(res, NOTIFICACIONES_URL, 'notificaciones', '/api/notifications')
-);
+app.patch('/gateway/inventario/:productoId', async (req, res) => {
+  if (!INVENTARIO_URL) {
+    return res.status(503).json({ error: 'Servicio de inventario no configurado' });
+  }
+  try {
+    const current = await getInventoryRecord(req.params.productoId);
+    const stockActual = extractStock(current);
+    const delta = numberOrNull(firstDefined(
+      req.body && req.body.delta,
+      req.body && req.body.stock,
+      req.body && req.body.quantity
+    ));
+    if (delta === null || stockActual === null) {
+      return res.status(400).json({ error: 'Envía delta (entero) y asegúrate de que el producto exista en inventario' });
+    }
+    const updated = await updateInventoryStock(req.params.productoId, current, stockActual + delta);
+    return res.json(updated);
+  } catch (error) {
+    return res.status(error.status || 502).json({
+      error: 'No fue posible actualizar inventario',
+      detalle: error.message,
+      upstream: error.data || null
+    });
+  }
+});
 
-app.post('/gateway/notificaciones', (req, res) =>
-  gatewayRequest(res, NOTIFICACIONES_URL, 'notificaciones', '/api/notifications', {
-    method: 'POST',
-    body: JSON.stringify({
-      servicio: req.body && req.body.servicio || 'equipo2',
-      mensaje: req.body && req.body.mensaje || '',
-      tipo: req.body && req.body.tipo || 'info'
-    })
-  })
-);
+app.get('/gateway/notificaciones', async (req, res) => {
+  if (!NOTIFICACIONES_URL) {
+    return res.status(503).json({
+      error: 'Servicio no configurado',
+      servicio: 'notificaciones',
+      detalle: 'Configura NOTIFICACIONES_URL en el archivo .env del Equipo 2.'
+    });
+  }
+
+  for (const basePath of NOTIFICACIONES_PATHS) {
+    try {
+      return res.json(await requestJson(NOTIFICACIONES_URL + basePath));
+    } catch (error) {
+      if (!error.status || ![404, 405].includes(error.status)) {
+        return res.status(error.status || 502).json({
+          error: 'No fue posible consultar notificaciones',
+          detalle: error.message,
+          upstream: error.data || null
+        });
+      }
+    }
+  }
+
+  return res.status(502).json({ error: 'No fue posible consultar notificaciones' });
+});
+
+app.post('/gateway/notificaciones', async (req, res) => {
+  if (!NOTIFICACIONES_URL) {
+    return res.status(503).json({
+      error: 'Servicio no configurado',
+      servicio: 'notificaciones',
+      detalle: 'Configura NOTIFICACIONES_URL en el archivo .env del Equipo 2.'
+    });
+  }
+
+  const servicio = (req.body && (req.body.servicio || req.body.service)) || 'equipo2';
+  const mensaje = (req.body && (req.body.mensaje || req.body.message)) || '';
+  const tipo = (req.body && (req.body.tipo || req.body.type)) || 'info';
+  // Se envían los dos vocabularios para ser compatibles con cualquier versión.
+  const body = JSON.stringify({
+    servicio, service: servicio,
+    mensaje, message: mensaje,
+    tipo, type: tipo
+  });
+
+  for (const basePath of NOTIFICACIONES_PATHS) {
+    try {
+      return res.json(await requestJson(NOTIFICACIONES_URL + basePath, { method: 'POST', body }));
+    } catch (error) {
+      if (!error.status || ![404, 405].includes(error.status)) {
+        return res.status(error.status || 502).json({
+          error: 'No fue posible registrar la notificación',
+          detalle: error.message,
+          upstream: error.data || null
+        });
+      }
+    }
+  }
+
+  return res.status(502).json({ error: 'No fue posible registrar la notificación' });
+});
+
+app.use((req, res) => res.status(404).json({ error: 'Ruta no encontrada' }));
 
 app.use((error, req, res, next) => {
   console.error(error);

@@ -1,78 +1,169 @@
 {
   "info": {
-    "_postman_id": "c3ef65fe-76ad-4fde-8e36-equipo2pedidospagos",
+    "_postman_id": "b2c3d4e5-2222-4b3c-8d4e-equipo2pedidospagos",
     "name": "Equipo 2 - Pedidos y Pagos",
-    "description": "Colección para probar Pedidos y Pagos con los puertos publicados por Docker Compose: Pedidos 2503 y Pagos 2504. Cambia la variable host si ejecutas Postman en otra máquina.",
+    "description": "Colección para probar Pedidos (2503) y Pagos (2504) con los puertos publicados por Docker Compose.\n\nCambia la variable {{host}} por la IPv4 de la computadora del Equipo 2 (o deja 'localhost' si Postman corre en esa misma máquina).\n\nPara el flujo completo: primero da de alta el cliente en el Equipo 1 y el producto + su inventario en el Equipo 3, y usa sus IDs en las variables {{clienteId}} y {{productoId}}. Revisa GET /gateway/status para confirmar que las cuatro URLs externas del .env están configuradas y alcanzables.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "host",
-      "value": "192.168.100.250"
+      "value": "localhost"
+    },
+    {
+      "key": "clienteId",
+      "value": "1"
+    },
+    {
+      "key": "productoId",
+      "value": "1"
     }
   ],
   "item": [
     {
-      "name": "Health pedidos",
-      "request": {
-        "method": "GET",
-        "url": "http://{{host}}:2503/health"
-      }
-    },
-    {
-      "name": "Crear pedido",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
+      "name": "Salud e integracion",
+      "item": [
+        {
+          "name": "Health pedidos",
+          "request": {
+            "method": "GET",
+            "url": "http://{{host}}:2503/health"
           }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"clienteId\": 1,\n  \"productoId\": 1,\n  \"cantidad\": 2,\n  \"precioUnitario\": 75.50,\n  \"metodoPago\": \"tarjeta\"\n}"
         },
-        "url": "http://{{host}}:2503/pedidos"
-      }
-    },
-    {
-      "name": "Listar pedidos",
-      "request": {
-        "method": "GET",
-        "url": "http://{{host}}:2503/pedidos"
-      }
-    },
-    {
-      "name": "Health pagos",
-      "request": {
-        "method": "GET",
-        "url": "http://{{host}}:2504/health"
-      }
-    },
-    {
-      "name": "Registrar pago manual",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
+        {
+          "name": "Health pagos",
+          "request": {
+            "method": "GET",
+            "url": "http://{{host}}:2504/health"
           }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"pedidoId\": 999,\n  \"monto\": 150.00,\n  \"metodo\": \"tarjeta\"\n}"
         },
-        "url": "http://{{host}}:2504/pagos"
-      }
+        {
+          "name": "Estado de integraciones (gateway)",
+          "request": {
+            "method": "GET",
+            "url": "http://{{host}}:2503/gateway/status"
+          }
+        }
+      ]
     },
     {
-      "name": "Listar pagos",
-      "request": {
-        "method": "GET",
-        "url": "http://{{host}}:2504/pagos"
-      }
+      "name": "Pedidos",
+      "item": [
+        {
+          "name": "Listar pedidos",
+          "request": {
+            "method": "GET",
+            "url": "http://{{host}}:2503/pedidos"
+          }
+        },
+        {
+          "name": "Consultar pedido",
+          "request": {
+            "method": "GET",
+            "url": "http://{{host}}:2503/pedidos/1"
+          }
+        },
+        {
+          "name": "Crear pedido (flujo completo)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": {{clienteId}},\n  \"productoId\": {{productoId}},\n  \"cantidad\": 1,\n  \"metodoPago\": \"tarjeta\"\n}"
+            },
+            "url": "http://{{host}}:2503/pedidos"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pagos",
+      "item": [
+        {
+          "name": "Listar pagos",
+          "request": {
+            "method": "GET",
+            "url": "http://{{host}}:2504/pagos"
+          }
+        },
+        {
+          "name": "Consultar pago",
+          "request": {
+            "method": "GET",
+            "url": "http://{{host}}:2504/pagos/1"
+          }
+        },
+        {
+          "name": "Consultar pago por pedido",
+          "request": {
+            "method": "GET",
+            "url": "http://{{host}}:2504/pagos/pedido/1"
+          }
+        },
+        {
+          "name": "Registrar pago manual",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pedidoId\": 999,\n  \"monto\": 150.00,\n  \"metodo\": \"tarjeta\"\n}"
+            },
+            "url": "http://{{host}}:2504/pagos"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Gateway a otros equipos",
+      "item": [
+        {
+          "name": "Clientes (Equipo 1)",
+          "request": {
+            "method": "GET",
+            "url": "http://{{host}}:2503/gateway/clientes"
+          }
+        },
+        {
+          "name": "Productos (Equipo 1)",
+          "request": {
+            "method": "GET",
+            "url": "http://{{host}}:2503/gateway/productos"
+          }
+        },
+        {
+          "name": "Inventario (Equipo 3)",
+          "request": {
+            "method": "GET",
+            "url": "http://{{host}}:2503/gateway/inventario"
+          }
+        },
+        {
+          "name": "Existencias de un producto (Equipo 3)",
+          "request": {
+            "method": "GET",
+            "url": "http://{{host}}:2503/gateway/inventario/{{productoId}}"
+          }
+        },
+        {
+          "name": "Notificaciones (Equipo 3)",
+          "request": {
+            "method": "GET",
+            "url": "http://{{host}}:2503/gateway/notificaciones"
+          }
+        }
+      ]
     }
   ]
 }
