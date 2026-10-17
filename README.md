@@ -7,7 +7,10 @@ contiene las API, su persistencia y el **orquestador del flujo de compra** del p
 | Documento | Contenido |
 |---|---|
 | Este README | Cómo ejecutar, rutas, contrato y cómo conectar con los equipos 1 y 3 |
-| `../reglas.md` | Reglas de integración de los tres equipos (puertos, red, firewall, checklist) |
+| `../reglas.md` | Acuerdo de integración de los tres equipos (puertos, red, firewall, checklist) |
+| `ROUTES.md` | Rutas y contratos de este equipo (documento compartido con los otros equipos) |
+| `MICROSERVICES_STANDARD.md` | Estándar general de microservicios SuperPOS (acuerdo de los tres equipos) |
+| `.env.example` | Plantilla de configuración común: puertos e IPs/hosts de los tres equipos |
 | `postman/` | Colección Postman con el flujo completo y el gateway |
 
 ## 1. Servicios y puertos
@@ -50,10 +53,17 @@ Equipo-2-Pedidos-y-Pagos/
 ```powershell
 git clone https://github.com/<usuario>/Equipo-2-Pedidos-y-Pagos.git
 cd Equipo-2-Pedidos-y-Pagos
-Copy-Item .env.example .env      # ajusta IPs de los equipos 1 y 3
+Copy-Item .env.example .env      # ajusta hosts/IPs de los equipos 1 y 3
 docker compose up --build -d
 docker compose ps                # espera a que pedidos y pagos estén "healthy"
 ```
+
+Todas las plantillas `.env.example` de los tres equipos declaran las URLs de los seis
+microservicios y del frontend, para mantener un **mapa común**. Ajusta `EQUIPO1_HOST`,
+`EQUIPO2_HOST`, `EQUIPO3_HOST` y `FRONTEND_HOST` a nombres DNS o reservas DHCP de la red; si
+no hay DNS local, usa la IP actual de cada laptop en los valores de host/URLs. Nunca uses
+`localhost` para un servicio alojado en otra computadora. Tras cambiar `.env`, recrea los
+contenedores con `docker compose up -d --force-recreate pedidos pagos`.
 
 Comprobaciones rápidas:
 
@@ -190,23 +200,39 @@ Por eso el flujo funciona con el Equipo 3 en cualquiera de las dos versiones.
 4. Registra el pedido como `PENDIENTE_PAGO` y solicita el pago a **Pagos** (mismo equipo).
 5. Al aprobarse el pago, el pedido pasa a `PAGADO` (o `PAGADO_PENDIENTE_INVENTARIO` si falla el paso 6).
 6. Descuenta la existencia en **Inventario** (`PUT`).
-7. **Pagos** registra la notificación en **Notificaciones** (`NOTIFICACIONES_URL`).
+7. **Pagos** registra la notificación del pago en **Notificaciones** (`NOTIFICACIONES_URL`).
+8. **Pedidos** registra además la notificación de la venta (`servicio: "ventas"`, con pedido,
+   cantidad y total). Si este último paso falla, la venta **no** se pierde: la respuesta
+   incluye `advertenciaNotificacion` y el pedido queda registrado como pagado.
 
 Cada paso queda reflejado en el objeto `integracion` de la respuesta.
 
 ## 8. Configuración de integración (`.env`)
 
+La plantilla `.env.example` es la **común de los tres equipos**: declara los hosts y los
+puertos de los seis microservicios y del frontend. Ajusta los hosts y, si no tienes DNS
+local, escribe la IP actual de cada laptop.
+
 ```env
-PEDIDOS_HOST_PORT=2503
-PAGOS_HOST_PORT=2504
+EQUIPO1_HOST=equipo1.local     # o la IPv4 de la laptop del Equipo 1
+EQUIPO2_HOST=equipo2.local     # esta computadora
+EQUIPO3_HOST=equipo3.local     # o la IPv4 de la laptop del Equipo 3
+FRONTEND_HOST=frontend.local
+
+CLIENTES_URL=http://${EQUIPO1_HOST}:2501
+PRODUCTOS_URL=http://${EQUIPO1_HOST}:2502
+INVENTARIO_URL=http://${EQUIPO3_HOST}:2506
+NOTIFICACIONES_URL=http://${EQUIPO3_HOST}:2507
+
+PEDIDOS_PORT=2503
+PAGOS_PORT=2504
 POSTGRES_HOST_PORT=5433
 
-CLIENTES_URL=http://IP-EQUIPO-1:2501
-PRODUCTOS_URL=http://IP-EQUIPO-1:2502
-INVENTARIO_URL=http://IP-EQUIPO-3:2506
-NOTIFICACIONES_URL=http://IP-EQUIPO-3:2507
-
-REQUEST_TIMEOUT_MS=5000
+POSTGRES_USER=tienda
+POSTGRES_PASSWORD=tienda123
+PEDIDOS_DATABASE_URL=postgresql://tienda:tienda123@postgres:5432/pedidos_db
+PAGOS_DATABASE_URL=postgresql://tienda:tienda123@postgres:5432/pagos_db
+REQUEST_TIMEOUT_MS=10000
 ```
 
 Reglas: **puertos publicados**, nunca `localhost` (dentro del contenedor `localhost` es el

@@ -314,6 +314,44 @@ async function updateInventoryStock(productoId, inventarioActual, nuevaExistenci
   throw lastError || new Error('No fue posible actualizar inventario');
 }
 
+/*
+ * Avisa a Notificaciones (Equipo 3) probando primero la ruta canonica (/notificaciones)
+ * y despues la heredada (/api/notifications). Envia los dos vocabularios de campos para
+ * funcionar tanto con la version alineada como con la anterior.
+ */
+async function notificarEvento(servicio, mensaje, tipo = 'info') {
+  if (!NOTIFICACIONES_URL) {
+    throw new Error('NOTIFICACIONES_URL no esta configurada');
+  }
+
+  const payload = JSON.stringify({
+    servicio,
+    service: servicio,
+    mensaje,
+    message: mensaje,
+    tipo,
+    type: tipo
+  });
+
+  let lastError = null;
+
+  for (const basePath of NOTIFICACIONES_PATHS) {
+    try {
+      return await requestJson(NOTIFICACIONES_URL + basePath, {
+        method: 'POST',
+        body: payload
+      });
+    } catch (error) {
+      if (error.status && ![404, 405].includes(error.status)) {
+        throw error;
+      }
+      lastError = error;
+    }
+  }
+
+  throw lastError || new Error('No fue posible registrar la notificacion');
+}
+
 function extractPrice(producto) {
   if (!producto || typeof producto !== 'object') return null;
 
@@ -740,6 +778,29 @@ app.post('/pedidos', async (req, res) => {
           integracion
         });
       }
+    }
+
+    // Notificacion de la venta: se registra al conocer el resultado definitivo
+    // (pago aprobado y existencias actualizadas). Usa la ruta canonica y cae en la
+    // heredada si el Equipo 3 todavia no la expone.
+    if (NOTIFICACIONES_URL) {
+      const nombreProducto = inventarioActual && (inventarioActual.nombre || inventarioActual.name)
+        ? (inventarioActual.nombre || inventarioActual.name)
+        : 'Producto ' + productoId;
+
+      try {
+        await notificarEvento(
+          'ventas',
+          `Venta confirmada: pedido #${pedido.id}, ${cantidad} x ${nombreProducto}, total ${total.toFixed(2)}`,
+          'success'
+        );
+        integracion.notificacionEnviada = true;
+      } catch (error) {
+        advertenciaNotificacion = 'La venta se completo, pero no se pudo registrar la notificacion: ' + error.message;
+        console.error(advertenciaNotificacion);
+      }
+    } else if (!advertenciaNotificacion) {
+      advertenciaNotificacion = 'La venta se completo, pero NOTIFICACIONES_URL no esta configurada.';
     }
 
     const finalResult = await pool.query('SELECT * FROM pedidos WHERE id = $1', [pedido.id]);
