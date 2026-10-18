@@ -53,17 +53,35 @@ Equipo-2-Pedidos-y-Pagos/
 ```powershell
 git clone https://github.com/<usuario>/Equipo-2-Pedidos-y-Pagos.git
 cd Equipo-2-Pedidos-y-Pagos
-Copy-Item .env.example .env      # ajusta hosts/IPs de los equipos 1 y 3
+node configurar-ips.mjs          # genera el .env a partir de ip-path
 docker compose up --build -d
 docker compose ps                # espera a que pedidos y pagos estén "healthy"
 ```
 
+### Configurar las direcciones de todos los equipos (`ip-path`)
+
+`ip-path` es la **única fuente de verdad** de las direcciones: se edita una vez y un comando
+genera el `.env` de este repositorio (que es local y no se versiona).
+
+```powershell
+notepad ip-path                  # IP de cada laptop; deja `auto` en esta PC
+node configurar-ips.mjs          # genera el .env
+node configurar-ips.mjs --probar # además prueba /health de cada dirección
+```
+
+- `auto` significa "ese equipo corre en esta computadora"; para los contenedores se traduce
+  en `host.docker.internal` (el `docker-compose.yml` ya lo habilita con `extra_hosts`).
+- Pedidos necesita `EQUIPO1_HOST` (clientes y productos) y `EQUIPO3_HOST` (inventario y
+  notificaciones); `EQUIPO2_HOST=auto` deja Pedidos y Pagos en esta computadora.
+- Antes de sobrescribir un `.env` existente se guarda una copia en `.env.respaldo`.
+- Si los cuatro repositorios están en la misma carpeta, se configura todo de una vez desde la
+  raíz del proyecto con `node configurar-ips.mjs`.
+
 Todas las plantillas `.env.example` de los tres equipos declaran las URLs de los seis
-microservicios y del frontend, para mantener un **mapa común**. Ajusta `EQUIPO1_HOST`,
-`EQUIPO2_HOST`, `EQUIPO3_HOST` y `FRONTEND_HOST` a nombres DNS o reservas DHCP de la red; si
-no hay DNS local, usa la IP actual de cada laptop en los valores de host/URLs. Nunca uses
-`localhost` para un servicio alojado en otra computadora. Tras cambiar `.env`, recrea los
-contenedores con `docker compose up -d --force-recreate pedidos pagos`.
+microservicios y del frontend, para mantener un **mapa común**, y `configurar-ips.mjs` las
+rellena desde `ip-path`. Nunca uses `localhost` para un servicio alojado en otra computadora.
+Tras cambiar las direcciones, recrea los contenedores con
+`docker compose up -d --force-recreate pedidos pagos`.
 
 Comprobaciones rápidas:
 

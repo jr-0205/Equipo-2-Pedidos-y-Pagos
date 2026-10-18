@@ -41,6 +41,10 @@ services:
       timeout: 5s
       retries: 5
       start_period: 15s
+    # Permite que host.docker.internal resuelva también en Docker sobre Linux,
+    # para que los contenedores alcancen los puertos publicados en esta PC.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       postgres:
         condition: service_healthy
@@ -76,6 +80,10 @@ services:
       timeout: 5s
       retries: 5
       start_period: 15s
+    # Permite que host.docker.internal resuelva también en Docker sobre Linux,
+    # para que los contenedores alcancen los puertos publicados en esta PC.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - equipo2-net
     restart: unless-stopped

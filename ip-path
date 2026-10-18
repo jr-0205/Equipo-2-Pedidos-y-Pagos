@@ -1,0 +1,22 @@
+# ip-path — única fuente de verdad de las direcciones de la demostración.
+#
+# Escribe la IPv4 (o el nombre DNS) de cada computadora:
+#
+#     EQUIPO1_HOST=192.168.1.21
+#     EQUIPO2_HOST=192.168.1.22
+#     EQUIPO3_HOST=192.168.1.23
+#     FRONTEND_HOST=192.168.1.21
+#
+# Como Pedidos y Pagos viven en esta computadora, deja EQUIPO2_HOST=auto.
+# Deja `auto` en cualquier equipo que corra en ESTA misma PC: se convierte en
+# `host.docker.internal`, así los contenedores alcanzan el puerto publicado en el
+# host. Pedidos necesita EQUIPO1_HOST (clientes y productos) y EQUIPO3_HOST
+# (inventario y notificaciones).
+#
+# Después de editar este archivo ejecuta:  node configurar-ips.mjs
+# El .env resultante es local y no se versiona.
+
+EQUIPO1_HOST=auto
+EQUIPO2_HOST=auto
+EQUIPO3_HOST=auto
+FRONTEND_HOST=auto
